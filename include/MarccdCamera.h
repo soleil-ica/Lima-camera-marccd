@@ -32,12 +32,12 @@ namespace lima
 	{
 
 		//--------------------------------------------------------------------
-		// \class MarccdCamera
+		// \class Camera
 		// \brief object controlling the marccd detector through a socket
 		//--------------------------------------------------------------------
-		class MarccdCamera : public yat::Task
+		class Camera : public yat::Task
 		{
-			DEB_CLASS_NAMESPC(DebModCamera, "MarccdCamera", "MarCCD");
+			DEB_CLASS_NAMESPC(DebModCamera, "Camera", "MarCCD");
 
 		public:
 
@@ -50,8 +50,8 @@ namespace lima
 				Unknown
 			};
 
-			MarccdCamera(const std::string& camera_ip, size_t port_number, const std::string& fullImagePathName);
-			~MarccdCamera();
+			Camera(const std::string& camera_ip, size_t port_number, const std::string& fullImagePathName);
+			~Camera();
 
 			void start();
 			void stop();
@@ -84,7 +84,7 @@ namespace lima
 			void setNbFrames(int  nb_frames);
 			void getNbFrames(int& nb_frames);
 
-			void getStatus(MarccdCamera::Status& status);
+			void getStatus(Camera::Status& status);
 
 			static const double PixelSize= 55.0; //- NOT PRIVATE !??
 			void getFrameRate(double& frame_rate);
@@ -137,8 +137,8 @@ namespace lima
 			
 			yat::ClientSocket* _sock;
 			
-			std::string _current_img_path;
-			std::string _previous_img_path;
+			std::string         _current_img_path;
+			std::string         _previous_img_path;
 			
 
 			//- lima stuff
@@ -150,40 +150,15 @@ namespace lima
 			//- img stuff
 			int 	m_nb_frames;	
 			Size	m_image_size;
-			//		IMG_TYPE		m_pixel_depth;
+      
 			unsigned short	m_trigger_type;
 			unsigned				m_exp_time;
 
-			uint16_t**	pSeqImage;
-			uint16_t*	  pOneImage;
-
-			//---------------------------------
-			//- xpad stuff 
-			short		m_acquisition_type;
-			unsigned	m_modules_mask;
-			int			m_module_number;
-			unsigned	m_chip_number;
-			int			m_full_image_size_in_bytes;
-			unsigned	m_time_unit;
-			std::vector<long>		m_all_config_g;
-
-			//- FParameters
-			unsigned		m_fparameter_deadtime;
-			unsigned		m_fparameter_init;
-			unsigned		m_fparameter_shutter;
-			unsigned		m_fparameter_ovf;
-			unsigned		m_fparameter_mode;
-			unsigned		m_fparameter_n;
-			unsigned		m_fparameter_p;
-			unsigned		m_fparameter_GP1;
-			unsigned		m_fparameter_GP2;
-			unsigned		m_fparameter_GP3;
-			unsigned		m_fparameter_GP4;
-
+	
 			size_t _marccd_state;
-			MarccdCamera::Status		m_status;
-			int							_image_number;
-			bool						_stop_already_done;
+			Camera::Status		m_status;
+			int							        _image_number;
+			bool						        _stop_already_done;
 
 			//- Marccd stuff 
 			std::string		_camera_ip;

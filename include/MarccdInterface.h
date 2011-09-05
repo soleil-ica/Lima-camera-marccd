@@ -3,7 +3,7 @@
 
 #include "HwInterface.h"
 #include "MarccdCamera.h"
-
+#include "MarccdReader.h"
 
 
 
@@ -22,7 +22,7 @@ class DetInfoCtrlObj : public HwDetInfoCtrlObj
 	DEB_CLASS_NAMESPC(DebModCamera, "DetInfoCtrlObj", "Marccd");
 
  public:
-	DetInfoCtrlObj(MarccdCamera& cam);
+	DetInfoCtrlObj(Camera& cam);
 	virtual ~DetInfoCtrlObj();
 
 	virtual void getMaxImageSize(Size& max_image_size);
@@ -40,7 +40,7 @@ class DetInfoCtrlObj : public HwDetInfoCtrlObj
 	virtual void unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
 
  private:
-	MarccdCamera& m_cam;
+	Camera& m_cam;
 };
 
 
@@ -53,7 +53,7 @@ class BufferCtrlObj : public HwBufferCtrlObj
 	DEB_CLASS_NAMESPC(DebModCamera, "BufferCtrlObj", "Marccd");
 
  public:
-	BufferCtrlObj(MarccdCamera& simu);
+	BufferCtrlObj(Camera& simu);
 	virtual ~BufferCtrlObj();
 
 	virtual void setFrameDim(const FrameDim& frame_dim);
@@ -73,11 +73,25 @@ class BufferCtrlObj : public HwBufferCtrlObj
 	virtual void getStartTimestamp(Timestamp& start_ts);
 	virtual void getFrameInfo(int acq_frame_nb, HwFrameInfoType& info);
 
+    // -- Buffer control object
+    BufferCtrlMgr&      getBufferMgr(){return m_buffer_ctrl_mgr;};
+    StdBufferCbMgr&     getBufferCbMgr(){return m_buffer_cb_mgr;};
+    
 	virtual void registerFrameCallback(HwFrameCallback& frame_cb);
 	virtual void unregisterFrameCallback(HwFrameCallback& frame_cb);
+  
+  // Reader stuff
+    void start();
+    void stop();
+    void reset();
+    int  getLastAcquiredFrame();    
 
  private:
-	BufferCtrlMgr& m_buffer_mgr;
+    SoftBufferAllocMgr      m_buffer_alloc_mgr;
+    StdBufferCbMgr          m_buffer_cb_mgr;
+    BufferCtrlMgr           m_buffer_ctrl_mgr;
+    Camera&                 m_cam;
+    Reader*                 m_reader;    
 };
 
 //*******************************************************************
@@ -89,7 +103,7 @@ class SyncCtrlObj : public HwSyncCtrlObj
     DEB_CLASS_NAMESPC(DebModCamera, "SyncCtrlObj", "Marccd");
 
   public:
-		SyncCtrlObj(MarccdCamera& cam, HwBufferCtrlObj& buffer_ctrl);
+		SyncCtrlObj(Camera& cam);
     virtual ~SyncCtrlObj();
 	
 		virtual bool checkTrigMode(TrigMode trig_mode);
@@ -108,7 +122,7 @@ class SyncCtrlObj : public HwSyncCtrlObj
     virtual void getValidRanges(ValidRangesType& valid_ranges);
 
   private:
-    MarccdCamera& m_cam;
+    Camera& m_cam;
 };
 
 //*******************************************************************
@@ -120,7 +134,7 @@ class Interface : public HwInterface
 	DEB_CLASS_NAMESPC(DebModCamera, "MarccdInterface", "Marccd");
 
  public:
-	Interface(MarccdCamera& cam);
+	Interface(Camera& cam);
 	virtual ~Interface();
 
 	//- From HwInterface
@@ -134,7 +148,7 @@ class Interface : public HwInterface
 
 	void 			getFrameRate(double& frame_rate);
  private:
-	MarccdCamera&		m_cam;
+	Camera&		m_cam;
 	CapList 		m_cap_list;
 	DetInfoCtrlObj	m_det_info;
 	BufferCtrlObj	m_buffer;
