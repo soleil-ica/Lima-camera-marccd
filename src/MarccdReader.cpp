@@ -28,7 +28,7 @@ Reader::Reader(Camera& cam, HwBufferCtrlObj& buffer_ctrl)
       set_periodic_msg_period(kTASK_PERIODIC_TIMEOUT_MS);
       m_cam.getImageSize(m_image_size);
       m_image = new uint16_t[m_image_size.getWidth()*m_image_size.getHeight()];      
-      memset((uint16_t*)m_image,0,m_image_size.getWidth()*m_image_size.getHeight()*2);      
+      memset((uint16_t*)m_image,0,m_image_size.getWidth()*m_image_size.getHeight());      
     }
     catch (Exception &e)
     {
@@ -74,7 +74,7 @@ void Reader::start()
             delete m_dw;
             m_dw = 0;
         }
-        m_dw = new gdshare::DirectoryWatcher("/nfs/spool/dt/xavier/");
+        m_dw = new gdshare::DirectoryWatcher("/home/informatique/ica/noureddine/DeviceSources/data/");
         this->post(new yat::Message(MARCCD_START_MSG), kPOST_MSG_TMO);
     }
     catch (Exception &e)
@@ -157,7 +157,7 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
           DEB_TRACE() <<"Reader::->TASK_PERIODIC";
           if(m_stop_already_done)
           {            
-              if(m_elapsed_seconds_from_stop >= 5)// TO
+              if(m_elapsed_seconds_from_stop >= 100)// TO
               {
                   enable_periodic_msg(false);            
                   return;
@@ -185,7 +185,7 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
                       DEB_TRACE()<<"-- Read an image using DI";
                       m_DI = new DI::DiffractionImage(const_cast<char*>(vecNewAndChangedFiles.at(i)->FullName().c_str()));
                                      
-                      m_image = (uint16_t*)m_DI->getImage();
+                      m_image = (uint16_t*)(m_DI->getImage());
   
                       DEB_TRACE()<<"-- prepare memory with image data"; 
                       int buffer_nb, concat_frame_nb;        

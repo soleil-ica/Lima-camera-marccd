@@ -68,9 +68,6 @@ namespace lima
 			void getDetectorType(std::string& type);
 			void getDetectorModel(std::string& model);
 
-			//- Buffer
-			BufferCtrlMgr& getBufferMgr();
-
 			//- Sync 
 			void setTrigMode(TrigMode  mode);
 			void getTrigMode(TrigMode& mode);
@@ -85,8 +82,7 @@ namespace lima
 			void getNbFrames(int& nb_frames);
 
 			void getStatus(Camera::Status& status);
-
-			static const double PixelSize= 55.0; //- NOT PRIVATE !??
+      
 			void getFrameRate(double& frame_rate);
 
 		protected:
@@ -131,40 +127,38 @@ namespace lima
 			*/
 			void perform_stop_sequence();
 
+			
+      static const double PixelSize= 39.795; //- NOT PRIVATE !??
+      
 			//- mutex to protect file against read image from device and
 			//-		marccd acquisition
-			yat::Mutex 	_lock;
+			yat::Mutex 	        _lock;
 			
-			yat::ClientSocket* _sock;
+			yat::ClientSocket*  _sock;
 			
 			std::string         _current_img_path;
 			std::string         _previous_img_path;
 			
 
-			//- lima stuff
-			SoftBufferAllocMgr 	m_buffer_alloc_mgr;
-			StdBufferCbMgr 			m_buffer_cb_mgr;
-			BufferCtrlMgr 			m_buffer_ctrl_mgr;
-			bool 								m_mis_cb_act;
 
 			//- img stuff
 			int 	m_nb_frames;	
 			Size	m_image_size;
       
-			unsigned short	m_trigger_type;
-			unsigned				m_exp_time;
+			unsigned short	    m_trigger_type;
+			unsigned				    m_exp_time;
 
 	
 			size_t _marccd_state;
-			Camera::Status		m_status;
-			int							        _image_number;
-			bool						        _stop_already_done;
+			Camera::Status		  m_status;
+			int							    _image_number;
+			bool						    _stop_already_done;
 
 			//- Marccd stuff 
-			std::string		_camera_ip;
-			size_t				_port_num;
-			std::string 	_detector_model;
-			std::string 	_detector_type;
+			std::string		      _camera_ip;
+			size_t				      _port_num;
+			std::string 	      _detector_model;
+			std::string 	      _detector_type;
 		};
 
 	} //- namespace Marccd

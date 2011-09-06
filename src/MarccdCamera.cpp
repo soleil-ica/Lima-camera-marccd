@@ -73,8 +73,6 @@ Camera::Camera(const std::string& camera_ip, size_t portNum, const std::string& 
 	_sock(0),
 	_current_img_path(full_image_path_name),
 	_previous_img_path(""),
-	m_buffer_cb_mgr(m_buffer_alloc_mgr),
-	m_buffer_ctrl_mgr(m_buffer_cb_mgr),
 	_marccd_state(TASK_STATE_IDLE),
 	m_status(Camera::Unknown),
 	_image_number(0),
@@ -561,15 +559,7 @@ void Camera::getDetectorModel(std::string& type)
 //-----------------------------------------------------
 void Camera::setMaxImageSizeCallbackActive(bool cb_active)
 {  
-	m_mis_cb_act = cb_active;
-}
 
-//-----------------------------------------------------
-//
-//-----------------------------------------------------
-BufferCtrlMgr& Camera::getBufferMgr()
-{
-	return m_buffer_ctrl_mgr;
 }
 
 //-----------------------------------------------------
@@ -954,6 +944,7 @@ std::cout << "Camera::perform_stop_sequence -> " << std::endl;
 		std::cout << "Camera::GetImage -> CHECKING MARCCD STATE : " << this->_marccd_state << std::endl;
 	}while(TEST_TASK_STATUS(this->_marccd_state,TASK_WRITE,TASK_STATE_WRITING));
 
+/********
 	//- prepare msg
 	yat::Message * msg = new yat::Message(GET_IMAGE_MSG, MAX_USER_PRIORITY);
 	if ( !msg )
@@ -964,6 +955,7 @@ std::cout << "Camera::perform_stop_sequence -> " << std::endl;
 	}
 	//- don't wait till the message is processed !!
 	this->post(msg);
+****/
 
 }
 
