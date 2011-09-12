@@ -10,7 +10,7 @@ using namespace std;
  *******************************************************************/
 DetInfoCtrlObj::DetInfoCtrlObj(Camera& cam)   :m_cam(cam)
 {
-    DEB_CONSTRUCTOR();
+  DEB_CONSTRUCTOR();
 }
 
 //-----------------------------------------------------
@@ -18,7 +18,7 @@ DetInfoCtrlObj::DetInfoCtrlObj(Camera& cam)   :m_cam(cam)
 //-----------------------------------------------------
 DetInfoCtrlObj::~DetInfoCtrlObj()
 {
-    DEB_DESTRUCTOR();
+  DEB_DESTRUCTOR();
 }
 
 //-----------------------------------------------------
@@ -26,8 +26,8 @@ DetInfoCtrlObj::~DetInfoCtrlObj()
 //-----------------------------------------------------
 void DetInfoCtrlObj::getMaxImageSize(Size& size)
 {
-    DEB_MEMBER_FUNCT();
-    m_cam.getImageSize(size);
+  DEB_MEMBER_FUNCT();
+  m_cam.getImageSize(size);
 }
 
 //-----------------------------------------------------
@@ -35,8 +35,8 @@ void DetInfoCtrlObj::getMaxImageSize(Size& size)
 //-----------------------------------------------------
 void DetInfoCtrlObj::getDetectorImageSize(Size& size)
 {
-    DEB_MEMBER_FUNCT();
-    m_cam.getImageSize(size);
+  DEB_MEMBER_FUNCT();
+  m_cam.getImageSize(size);
 }
 
 //-----------------------------------------------------
@@ -44,7 +44,7 @@ void DetInfoCtrlObj::getDetectorImageSize(Size& size)
 //-----------------------------------------------------
 void DetInfoCtrlObj::getDefImageType(ImageType& image_type)
 {
-    DEB_MEMBER_FUNCT();
+  DEB_MEMBER_FUNCT();
 	m_cam.getImageType(image_type);
 }
 
@@ -53,7 +53,7 @@ void DetInfoCtrlObj::getDefImageType(ImageType& image_type)
 //-----------------------------------------------------
 void DetInfoCtrlObj::getCurrImageType(ImageType& image_type)
 {
-    DEB_MEMBER_FUNCT();
+  DEB_MEMBER_FUNCT();
 	m_cam.getImageType(image_type);
 }
 
@@ -62,11 +62,11 @@ void DetInfoCtrlObj::getCurrImageType(ImageType& image_type)
 //-----------------------------------------------------
 void DetInfoCtrlObj::setCurrImageType(ImageType image_type)
 {
-    DEB_MEMBER_FUNCT();
-    ImageType valid_image_type;
-    getDefImageType(valid_image_type);
-    if (image_type != valid_image_type)
-		THROW_HW_ERROR(Error) << "Cannot change to "  << DEB_VAR2(image_type, valid_image_type);
+  DEB_MEMBER_FUNCT();
+  ImageType valid_image_type;
+  getDefImageType(valid_image_type);
+  if (image_type != valid_image_type)
+  THROW_HW_ERROR(Error) << "Cannot change to "  << DEB_VAR2(image_type, valid_image_type);
 }
 
 //-----------------------------------------------------
@@ -74,8 +74,8 @@ void DetInfoCtrlObj::setCurrImageType(ImageType image_type)
 //-----------------------------------------------------
 void DetInfoCtrlObj::getPixelSize(double& size)
 {
-    DEB_MEMBER_FUNCT();
-    m_cam.getPixelSize(size);
+  DEB_MEMBER_FUNCT();
+  m_cam.getPixelSize(size);
 }
 
 //-----------------------------------------------------
@@ -83,8 +83,8 @@ void DetInfoCtrlObj::getPixelSize(double& size)
 //-----------------------------------------------------
 void DetInfoCtrlObj::getDetectorType(std::string& type)
 {
-    DEB_MEMBER_FUNCT();
-    m_cam.getDetectorType(type);
+  DEB_MEMBER_FUNCT();
+  m_cam.getDetectorType(type);
 }
 
 //-----------------------------------------------------
@@ -92,8 +92,8 @@ void DetInfoCtrlObj::getDetectorType(std::string& type)
 //-----------------------------------------------------
 void DetInfoCtrlObj::getDetectorModel(std::string& model)
 {
-    DEB_MEMBER_FUNCT();
-    m_cam.getDetectorModel(model);
+  DEB_MEMBER_FUNCT();
+  m_cam.getDetectorModel(model);
 }
 
 //-----------------------------------------------------
@@ -101,8 +101,7 @@ void DetInfoCtrlObj::getDetectorModel(std::string& model)
 //-----------------------------------------------------
 void DetInfoCtrlObj::registerMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 {
-    DEB_MEMBER_FUNCT();
-
+  DEB_MEMBER_FUNCT();
 }
 
 //-----------------------------------------------------
@@ -110,8 +109,7 @@ void DetInfoCtrlObj::registerMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 //-----------------------------------------------------
 void DetInfoCtrlObj::unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 {
-    DEB_MEMBER_FUNCT();
-
+  DEB_MEMBER_FUNCT();
 }
 
 
@@ -126,8 +124,8 @@ BufferCtrlObj::BufferCtrlObj(Camera& cam)
         m_cam(cam)
 {
 	DEB_CONSTRUCTOR();
-    m_reader = new Reader(cam,*this);
-    m_reader->go(2000);  
+  m_reader = new Reader(cam,*this);
+  m_reader->go(2000);  
 }
 
 //-----------------------------------------------------
@@ -136,8 +134,8 @@ BufferCtrlObj::BufferCtrlObj(Camera& cam)
 BufferCtrlObj::~BufferCtrlObj()
 {
 	DEB_DESTRUCTOR();
-    m_reader->stop();
-    m_reader->exit();  
+  m_reader->stop();
+  m_reader->exit();  
 }
 
 //-----------------------------------------------------
@@ -200,7 +198,7 @@ void BufferCtrlObj::getNbConcatFrames(int& nb_concat_frames)
 void BufferCtrlObj::getMaxNbBuffers(int& max_nb_buffers)
 {
 	DEB_MEMBER_FUNCT();
-    m_buffer_ctrl_mgr.getMaxNbBuffers(max_nb_buffers);
+  m_buffer_ctrl_mgr.getMaxNbBuffers(max_nb_buffers);
 }
 
 //-----------------------------------------------------
@@ -209,7 +207,7 @@ void BufferCtrlObj::getMaxNbBuffers(int& max_nb_buffers)
 void *BufferCtrlObj::getBufferPtr(int buffer_nb, int concat_frame_nb)
 {
 	DEB_MEMBER_FUNCT();
-    return m_buffer_ctrl_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
+  return m_buffer_ctrl_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
 }
 
 //-----------------------------------------------------
@@ -218,7 +216,7 @@ void *BufferCtrlObj::getBufferPtr(int buffer_nb, int concat_frame_nb)
 void *BufferCtrlObj::getFramePtr(int acq_frame_nb)
 {
 	DEB_MEMBER_FUNCT();
-    return m_buffer_ctrl_mgr.getFramePtr(acq_frame_nb);
+  return m_buffer_ctrl_mgr.getFramePtr(acq_frame_nb);
 }
 
 //-----------------------------------------------------
@@ -271,8 +269,8 @@ void BufferCtrlObj::start()
 //-----------------------------------------------------
 void BufferCtrlObj::stop()
 {
-    DEB_MEMBER_FUNCT();
-    m_reader->stop();
+  DEB_MEMBER_FUNCT();
+  m_reader->stop();
 }
 
 //-----------------------------------------------------
@@ -280,8 +278,8 @@ void BufferCtrlObj::stop()
 //-----------------------------------------------------
 void BufferCtrlObj::reset()
 {
-    DEB_MEMBER_FUNCT();
-    m_reader->reset();
+  DEB_MEMBER_FUNCT();
+  m_reader->reset();
 }
 
 //-----------------------------------------------------
@@ -289,7 +287,7 @@ void BufferCtrlObj::reset()
 //-----------------------------------------------------
 int BufferCtrlObj::getLastAcquiredFrame()
 {
-    return m_reader->getLastAcquiredFrame();
+  return m_reader->getLastAcquiredFrame();
 }
 
 /*******************************************************************
@@ -335,7 +333,6 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 	if (!checkTrigMode(trig_mode))
 		THROW_HW_ERROR(InvalidValue) << "Invalid " << DEB_VAR1(trig_mode);
 	m_cam.setTrigMode(trig_mode);
-	
 }
 
 //-----------------------------------------------------
@@ -471,7 +468,7 @@ void Interface::reset(ResetLevel reset_level)
 void Interface::prepareAcq()
 {
 	DEB_MEMBER_FUNCT();
-    m_buffer.reset();    
+  m_buffer.reset();
 	m_cam.prepare();
 }
 
@@ -482,7 +479,7 @@ void Interface::startAcq()
 {
 	DEB_MEMBER_FUNCT();
 	m_cam.start();
-    m_buffer.start();    
+  m_buffer.start();    
 }
 
 //-----------------------------------------------------
@@ -492,7 +489,7 @@ void Interface::stopAcq()
 {
 	DEB_MEMBER_FUNCT();
 	m_cam.stop();
-    m_buffer.stop();    
+  m_buffer.stop();    
 }
 
 //-----------------------------------------------------
@@ -511,24 +508,28 @@ void Interface::getStatus(StatusType& status)
 		case Camera::Ready:
 			status.acq = AcqReady;
 			status.det = DetIdle;
-			break;
+		break;
+
 		case Camera::Exposure:
 			status.acq = AcqRunning;
 			status.det = DetExposure;
-			break;
+		break;
+
 		case Camera::Readout:
 			status.acq = AcqRunning;
 			status.det = DetReadout;
-			break;
+		break;
+
 		case Camera::Latency:
 			status.acq = AcqRunning;
 			status.det = DetLatency;
-			break;
+		break;
+
 		case Camera::Unknown:
 		case Camera::Fault:
 			status.acq = AcqFault;
 			status.det = DetFault;
-			break;
+		break;
 	}
 	status.det_mask = DetExposure | DetReadout | DetLatency | DetFault;
 /////std::cout << "\t***** Interface::getStatus -> StatusType = " << status.acq << std::endl;

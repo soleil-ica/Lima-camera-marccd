@@ -27,8 +27,6 @@ Reader::Reader(Camera& cam, HwBufferCtrlObj& buffer_ctrl)
       enable_periodic_msg(false);
       set_periodic_msg_period(kTASK_PERIODIC_TIMEOUT_MS);
       m_cam.getImageSize(m_image_size);
-      m_image = new uint16_t[m_image_size.getWidth()*m_image_size.getHeight()];      
-      memset((uint16_t*)m_image,0,m_image_size.getWidth()*m_image_size.getHeight());      
     }
     catch (Exception &e)
     {
@@ -74,7 +72,7 @@ void Reader::start()
             delete m_dw;
             m_dw = 0;
         }
-        m_dw = new gdshare::DirectoryWatcher("/home/informatique/ica/noureddine/DeviceSources/data/");
+        m_dw = new gdshare::DirectoryWatcher(m_cam.getDirectoryWatcherPath());
         this->post(new yat::Message(MARCCD_START_MSG), kPOST_MSG_TMO);
     }
     catch (Exception &e)
@@ -92,11 +90,6 @@ void Reader::stop()
 {
     DEB_MEMBER_FUNCT();
     {
-        if(m_dw!=0)
-        {
-            delete m_dw;
-            m_dw = 0;
-        }   
         this->post(new yat::Message(MARCCD_STOP_MSG), kPOST_MSG_TMO);
     }
 }
@@ -157,9 +150,14 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
           DEB_TRACE() <<"Reader::->TASK_PERIODIC";
           if(m_stop_already_done)
           {            
-              if(m_elapsed_seconds_from_stop >= 100)// TO
+              if(m_elapsed_seconds_from_stop >= 30)// TO
               {
-                  enable_periodic_msg(false);            
+                  enable_periodic_msg(false);
+                if(m_dw!=0)
+                {
+                    delete m_dw;
+                    m_dw = 0;
+                }                     
                   return;
               }
               m_elapsed_seconds_from_stop ++;
@@ -170,13 +168,14 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
   
           StdBufferCbMgr& buffer_mgr = ((reinterpret_cast<BufferCtrlObj&>(m_buffer)).getBufferCbMgr());
           
-          if(m_dw && m_dw->HasChanged())
+          if(m_dw)
           {
               gdshare::FileNamePtrVector vecNewAndChangedFiles;
               m_dw->GetChanges(&vecNewAndChangedFiles,&vecNewAndChangedFiles);
-               
+
               for(int i= 0;i<vecNewAndChangedFiles.size();i++)
               {
+                  DEB_TRACE() <<"vecNewAndChangedFiles = "<< vecNewAndChangedFiles.at(i)->FullName();
                   if(vecNewAndChangedFiles.at(i)->FileExists())
                   {
                       DEB_TRACE()  << "image#" << m_image_number <<" acquired !";
@@ -185,7 +184,8 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
                       DEB_TRACE()<<"-- Read an image using DI";
                       m_DI = new DI::DiffractionImage(const_cast<char*>(vecNewAndChangedFiles.at(i)->FullName().c_str()));
                                      
-                      m_image = (uint16_t*)(m_DI->getImage());
+                      if(m_image_size.getWidth()!=m_DI->getWidth() || m_image_size.getHeight()!=m_DI->getHeight())
+                        throw LIMA_HW_EXC(Error, "Image size in file is different from the expected image size of this detector !");
   
                       DEB_TRACE()<<"-- prepare memory with image data"; 
                       int buffer_nb, concat_frame_nb;        
@@ -193,7 +193,11 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
                       buffer_mgr.acqFrameNb2BufferNb(m_image_number, buffer_nb, concat_frame_nb);
                       
                       void *ptr = buffer_mgr.getBufferPtr(buffer_nb,   concat_frame_nb);
-                      memcpy((uint16_t *)ptr,(uint16_t *)( m_image),m_DI->getWidth()*m_DI->getHeight()*2);//*2 because 16bits
+
+                      for(int j=0;j<m_DI->getWidth()*m_DI->getHeight();j++)
+                      {
+                        ((uint16_t*)ptr)[j] = (uint16_t)( m_DI->getImage()[j]);
+                      }
 
                       DEB_TRACE()<<"-- newFrameReady";                      
                       HwFrameInfoType frame_info;

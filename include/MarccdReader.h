@@ -80,10 +80,9 @@ class Reader : public yat::Task
     int                         m_elapsed_seconds_from_stop;
     gdshare::DirectoryWatcher*  m_dw;
     
-    //simulate an image !
-    uint16_t*                   m_image;
+    //Loading image stuff!
     Size                        m_image_size;
-		DI::DiffractionImage*       m_DI;    
+	DI::DiffractionImage*       m_DI;    
 
 };
 } // namespace Pilatus

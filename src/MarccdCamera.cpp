@@ -68,28 +68,25 @@ enum {
 //---------------------------
 //- Ctor
 //---------------------------
-Camera::Camera(const std::string& camera_ip, size_t portNum, const std::string& full_image_path_name)
+Camera::Camera(const std::string& camera_ip, size_t port_num, const std::string& img_path, const std::string& img_name, const std::string& img_dir_watcher)
 : yat::Task(),
 	_sock(0),
-	_current_img_path(full_image_path_name),
-	_previous_img_path(""),
+	_camera_ip(camera_ip),
+	_port_num(port_num),
+	_image_path(img_path),
+	_image_name(img_name),
+  _image_dir_watcher_path(img_dir_watcher),
 	_marccd_state(TASK_STATE_IDLE),
 	m_status(Camera::Unknown),
 	_image_number(0),
 	_stop_already_done(false),
-	_camera_ip(camera_ip),
-	_port_num(portNum),
 	_detector_model(""),
 	_detector_type("")
 {
 	DEB_CONSTRUCTOR();
  
 	DEB_TRACE() << "Camera::Camera() - ENTERING ...";
-	std::cout << "Camera::Camera() - _current_img_path INIT : " << _current_img_path << std::endl;
 
-	_current_img_path = "/nfs/spool/xavier/imgRAW.00xx";
-	_previous_img_path= "/nfs/spool/dt/xavier/imgRAW.00xx";
-	std::cout << "Camera::Camera() - _current_img_path NOW : " << _current_img_path << std::endl;
 	try
 	{
     //this->enable_periodic_msg( true );
@@ -406,6 +403,8 @@ void Camera::FreeImage()
 //---------------------------
 void Camera::GetImage()
 {
+/***** DONE BY DirectorWacher in Reader.
+
 	//- pointer which will receive the image data (from file)
 	std::ifstream filestr(this->_previous_img_path.c_str());
 	std::filebuf *pbuf;
@@ -416,7 +415,7 @@ std::cout << "Camera::GetImage() <- ..." << std::endl;
 		std::cout << "Camera::GetImage() -> FAILED TO OPEN : "<< this->_current_img_path << " image file !!!" << std::endl;
 		return;
 	}
-
+****/
 
 	try
 	{
@@ -457,7 +456,7 @@ std::cout << "Camera::GetImage() -> DONE !" << std::endl;
 			std::cerr << "MARCAM GET_IMAGE -> An ... exception occurred!"  << std::endl;
         //- XE throw LIMA_HW_EXC(Error, e.GetDescription());
 				std::cout << "Camera::GetImage() -> ERROR : failed to read image from file : \n"
-									<< "****** $" << this->_current_img_path << "$" << std::endl;
+									<< "****** $" << this->_image_path <<this->_image_name<< "$" << std::endl;
     }			
 }
 
@@ -739,20 +738,17 @@ void Camera::getStatus(Camera::Status& status)
 	writingStatus = TASK_STATUS(this->_marccd_state, TASK_WRITE); 
 	dezingerStatus= TASK_STATUS(this->_marccd_state, TASK_DEZINGER);
 
-	if (this->_marccd_state == 0) m_status = Camera::Ready;
-	else if (this->_marccd_state == 7) m_status = Camera::Fault;
-	else if (this->_marccd_state == 8) m_status = Camera::Ready;  /* This is really busy interpreting command,
-																										but we don't have a status for that yet */
+	if (this->_marccd_state == 0)                     m_status = Camera::Ready;
+	else if (this->_marccd_state == 7)                m_status = Camera::Fault;
+	else if (this->_marccd_state == 8)                m_status = Camera::Ready;  /* This is really busy interpreting command but we don't have a status for that yet */
 	else if (acquireStatus & (TASK_STATUS_EXECUTING)) m_status = Camera::Exposure;
 	else if (readoutStatus & (TASK_STATUS_EXECUTING)) m_status = Camera::Readout;
 	else if (correctStatus & (TASK_STATUS_EXECUTING)) m_status = Camera::Readout;/*ADStatusCorrect*/
 	else if (writingStatus & (TASK_STATUS_EXECUTING)) m_status = Camera::Readout;/*ADStatusSaving*/
-	if ((acquireStatus | readoutStatus | correctStatus | writingStatus | dezingerStatus) & 
-		TASK_STATUS_ERROR) m_status = Camera::Fault;
+	if ((acquireStatus | readoutStatus | correctStatus | writingStatus | dezingerStatus) & 	TASK_STATUS_ERROR)
+    m_status = Camera::Fault;
 
 	status = m_status;
-////std::cout << "*********\tMarccdCamera::getStatus -> m_status = " << m_status << "\n" << std::endl;
-////std::cout << "*********\tMarccdCamera::getStatus -> m_status = " << status << "\n" << std::endl;
 
 	DEB_RETURN() << DEB_VAR1(DEB_HEX(status));
 }
@@ -932,8 +928,9 @@ std::cout << "Camera::perform_stop_sequence <- " << std::endl;
 	//---------------------------------------
 	//- Send readout cmd with a specific file name
 	std::string cmd_to_send("readout,0,");
-	cmd_to_send += this->_current_img_path;
-	std::cout << "Camera::written file : &" << cmd_to_send << "$" << std::endl;
+	cmd_to_send += this->_image_path;
+	cmd_to_send += this->_image_name;
+std::cout << "Camera::written file : &" << cmd_to_send << "$" << std::endl;
 
 	this->write(cmd_to_send);
 std::cout << "Camera::perform_stop_sequence -> " << std::endl;
@@ -959,6 +956,7 @@ std::cout << "Camera::perform_stop_sequence -> " << std::endl;
 
 }
 
+//-----------------------------------------------------
 void Camera::get_marccd_state()
 {
 	//- get detectot state string value
@@ -966,7 +964,13 @@ void Camera::get_marccd_state()
 	
 	//- convert state string to numeric val
 	this->_marccd_state  = yat::XString<size_t>::to_num(stateStr);
-////std::cout << "\n*********\tMarccdCamera::getStatus -> mar_state = " << this->_marccd_state << std::endl;
 }
 
+//-----------------------------------------------------
+// - getDirectoryWatcherPath
+//-----------------------------------------------------
+const std::string& Camera::getDirectoryWatcherPath(void)
+{
+  return _image_dir_watcher_path;
+}
 //-----------------------------------------------------

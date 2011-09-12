@@ -50,7 +50,7 @@ namespace lima
 				Unknown
 			};
 
-			Camera(const std::string& camera_ip, size_t port_number, const std::string& fullImagePathName);
+			Camera(const std::string& camera_ip, size_t port_number, const std::string& img_path, const std::string& img_name,const std::string& img_dir_watcher);
 			~Camera();
 
 			void start();
@@ -84,7 +84,8 @@ namespace lima
 			void getStatus(Camera::Status& status);
       
 			void getFrameRate(double& frame_rate);
-
+      
+      const std::string& getDirectoryWatcherPath(void);
 		protected:
 			virtual void setMaxImageSizeCallbackActive(bool cb_active);	
 
@@ -136,8 +137,9 @@ namespace lima
 			
 			yat::ClientSocket*  _sock;
 			
-			std::string         _current_img_path;
-			std::string         _previous_img_path;
+			std::string         _image_path;
+			std::string         _image_name;
+			std::string         _image_dir_watcher_path;
 			
 
 
