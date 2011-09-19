@@ -13,10 +13,6 @@
 
 #define kPOST_MSG_TMO       2
 
-const size_t  START_MSG			=	(yat::FIRST_USER_MSG + 100);
-const size_t  STOP_MSG			=	(yat::FIRST_USER_MSG + 101);
-const size_t  GET_IMAGE_MSG	=	(yat::FIRST_USER_MSG + 102);
-
 ///////////////////////////////////////////////////////////
 
 #include <stdlib.h>
@@ -55,8 +51,9 @@ namespace lima
 
 			void start();
 			void stop();
-			//- to be renamed "take_background_frame"
-			void prepare(); //- Take a background frame (to substracted)
+			void take_background_frame();
+
+			void prepare(); //- USEFULL ?
 
 			// -- detector info
 			void getImageSize(Size& size);
@@ -84,6 +81,9 @@ namespace lima
 			void getStatus(Camera::Status& status);
       
 			void getFrameRate(double& frame_rate);
+
+			void setBinning(const Bin&);
+			void getBinning(Bin&);
       
       const std::string& getDirectoryWatcherPath(void);
 		protected:
@@ -127,7 +127,12 @@ namespace lima
 			* Method to stop an Marccd acquisition
 			*/
 			void perform_stop_sequence();
+			/**
+			* Sequence to take a background frame
+			*/
+			void perform_background_frame();
 
+			int convertStringToInt( char* hexa_text );
 			
       static const double PixelSize= 39.795; //- NOT PRIVATE !??
       

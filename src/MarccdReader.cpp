@@ -168,7 +168,10 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
   
           StdBufferCbMgr& buffer_mgr = ((reinterpret_cast<BufferCtrlObj&>(m_buffer)).getBufferCbMgr());
           
-          if(m_dw)
+					//- update image info
+					m_cam.getImageSize(m_image_size);
+
+					if(m_dw)
           {
               gdshare::FileNamePtrVector vecNewAndChangedFiles;
               m_dw->GetChanges(&vecNewAndChangedFiles,&vecNewAndChangedFiles);
@@ -183,6 +186,10 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
                       
                       DEB_TRACE()<<"-- Read an image using DI";
                       m_DI = new DI::DiffractionImage(const_cast<char*>(vecNewAndChangedFiles.at(i)->FullName().c_str()));
+                      DEB_TRACE()<<"-- Read an image using DI -> new DI DONE";
+
+std::cout << "m_image_size.getWidth() = " << m_image_size.getWidth() << " & m_image_size.getHeight() = " << m_image_size.getHeight() << std::endl;
+std::cout << "m_DI->getWidth() = " << m_DI->getWidth() << " & m_DI->getHeight() = " << m_DI->getHeight() << std::endl;
                                      
                       if(m_image_size.getWidth()!=m_DI->getWidth() || m_image_size.getHeight()!=m_DI->getHeight())
                         throw LIMA_HW_EXC(Error, "Image size in file is different from the expected image size of this detector !");

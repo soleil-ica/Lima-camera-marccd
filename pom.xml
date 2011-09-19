@@ -13,20 +13,32 @@
 	
     <name>LimaMarccd</name>    <!-- use for the name of executable -->
     <description>This module controls the MarCCD SX 165 Detector</description>
-		
+
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.freehep</groupId>
-                <artifactId>freehep-nar-plugin</artifactId>
-            </plugin>
-        </plugins>
+      <plugins>
+        <plugin>
+          <groupId>org.freehep</groupId>
+          <artifactId>freehep-nar-plugin</artifactId>
+          <configuration>
+            <cpp>
+              <defines>
+                <define>BOOST_ALL_DYN_LINK</define>
+                <define>LOG4TANGO_HAVE_INT64_T</define>
+              </defines>
+            </cpp>
+          </configuration>
+        </plugin>
+      </plugins>
     </build>
 
   <dependencies>
     <dependency>
       <groupId>uk.ac.ccp4</groupId>
       <artifactId>DiffractionImage-${aol}-shared-release</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.boost</groupId>
+      <artifactId>Boost-libraries-${aol}-shared-${mode}</artifactId>
     </dependency>
   </dependencies>
 

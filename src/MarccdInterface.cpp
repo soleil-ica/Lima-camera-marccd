@@ -406,11 +406,36 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 
 
 /*******************************************************************
+ * \brief BinCtrlObj constructor
+ *******************************************************************/
+BinCtrlObj::BinCtrlObj(Camera &cam) 
+: m_cam(cam) 
+{
+	//- Noop
+}
+
+/*******************************************************************
+ * \brief setBin : set new binning value
+ *******************************************************************/
+void BinCtrlObj::setBin(const Bin& aBin)
+{
+  m_cam.setBinning(aBin);
+}
+
+/*******************************************************************
+ * \brief getBin : returns binning value
+ *******************************************************************/
+void BinCtrlObj::getBin(Bin &aBin)
+{
+  m_cam.getBinning(aBin);
+}
+
+/*******************************************************************
  * \brief Hw Interface constructor
  *******************************************************************/
 
 Interface::Interface(Camera& cam)
-	: m_cam(cam),m_det_info(cam), m_buffer(cam),m_sync(cam)
+	: m_cam(cam),m_det_info(cam), m_buffer(cam),m_sync(cam),m_bin(cam)
 {
 	DEB_CONSTRUCTOR();
 
@@ -422,6 +447,9 @@ Interface::Interface(Camera& cam)
 	
 	HwSyncCtrlObj *sync = &m_sync;
 	m_cap_list.push_back(HwCap(sync));
+			
+	HwBinCtrlObj *bin = &m_bin;
+	m_cap_list.push_back(HwCap(bin));
 }
 
 //-----------------------------------------------------
@@ -495,6 +523,15 @@ void Interface::stopAcq()
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
+void Interface::takeBackgroundFrame()
+{
+	DEB_MEMBER_FUNCT();
+	m_cam.take_background_frame();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
 void Interface::getStatus(StatusType& status)
 {
 	Camera::Status marccd_status = Camera::Unknown;
@@ -556,4 +593,23 @@ void Interface::getFrameRate(double& frame_rate)
 	DEB_MEMBER_FUNCT();
 	m_cam.getFrameRate(frame_rate);
 }
+
+////-----------------------------------------------------
+////
+////-----------------------------------------------------
+//void Interface::getBinning(unsigned short& bin)
+//{
+//	DEB_MEMBER_FUNCT();
+//	m_cam.getBinning(bin);
+//}
+//
+////-----------------------------------------------------
+////
+////-----------------------------------------------------
+//void Interface::setBinning(unsigned short bin)
+//{
+//	DEB_MEMBER_FUNCT();
+//	m_cam.setBinning(bin);
+//}
+
 //-----------------------------------------------------

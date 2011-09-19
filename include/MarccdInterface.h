@@ -125,6 +125,24 @@ class SyncCtrlObj : public HwSyncCtrlObj
     Camera& m_cam;
 };
 
+/*******************************************************************
+ * \class BinCtrlObj
+ * \brief Control object providing MarCCD Bin interface
+ *******************************************************************/
+class BinCtrlObj : public HwBinCtrlObj
+{
+ public:
+  BinCtrlObj(Camera& cam);
+  virtual ~BinCtrlObj() {}
+  
+  virtual void setBin(const Bin& bin);
+  virtual void getBin(Bin& bin);
+  //allow all binning
+  virtual void checkBin(Bin& bin) {}
+ private:
+  Camera& m_cam;
+};
+
 //*******************************************************************
 // * \class Interface
 // * \brief Marccd hardware interface
@@ -143,16 +161,23 @@ class Interface : public HwInterface
 	virtual void 	prepareAcq();
 	virtual void 	startAcq();
 	virtual void 	stopAcq();
+	virtual void  takeBackgroundFrame();
 	virtual void 	getStatus(StatusType& status);
 	virtual int 	getNbHwAcquiredFrames();
 
-	void 			getFrameRate(double& frame_rate);
+	virtual void	getFrameRate(double& frame_rate);
+	
+	//- To be deleted : done in BinCtrlObj (see above) !!!
+	//virtual void	setBinning(unsigned short bin);
+	//virtual void	getBinning(unsigned short& bin);
+
  private:
-	Camera&		m_cam;
-	CapList 		m_cap_list;
+	Camera&					m_cam;
+	CapList 				m_cap_list;
 	DetInfoCtrlObj	m_det_info;
-	BufferCtrlObj	m_buffer;
-	SyncCtrlObj	m_sync;
+	BufferCtrlObj		m_buffer;
+	SyncCtrlObj			m_sync;
+	BinCtrlObj      m_bin;
 
 };
 
