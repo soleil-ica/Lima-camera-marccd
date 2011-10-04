@@ -161,7 +161,7 @@ class Interface : public HwInterface
 	virtual void 	prepareAcq();
 	virtual void 	startAcq();
 	virtual void 	stopAcq();
-	virtual void  takeBackgroundFrame();
+	virtual void  	takeBackgroundFrame();
 	virtual void 	getStatus(StatusType& status);
 	virtual int 	getNbHwAcquiredFrames();
 
@@ -172,12 +172,12 @@ class Interface : public HwInterface
 	//virtual void	getBinning(unsigned short& bin);
 
  private:
-	Camera&					m_cam;
-	CapList 				m_cap_list;
-	DetInfoCtrlObj	m_det_info;
+	Camera&				m_cam;
+	CapList 			m_cap_list;
+	DetInfoCtrlObj		m_det_info;
 	BufferCtrlObj		m_buffer;
 	SyncCtrlObj			m_sync;
-	BinCtrlObj      m_bin;
+	BinCtrlObj      	m_bin;
 
 };
 

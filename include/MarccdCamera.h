@@ -47,7 +47,7 @@ namespace lima
 			};
 
 			Camera(const std::string& camera_ip, size_t port_number, const std::string& img_path, const std::string& img_name,const std::string& img_dir_watcher);
-			~Camera();
+			virtual ~Camera();
 
 			void start();
 			void stop();
