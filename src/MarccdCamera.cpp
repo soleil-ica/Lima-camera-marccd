@@ -16,7 +16,7 @@ const double _NaN_ = ::sqrt(-1.);
 //- User task messages
 const size_t  START_MSG			=	(yat::FIRST_USER_MSG + 100);
 const size_t  STOP_MSG			=	(yat::FIRST_USER_MSG + 101);
-const size_t  GET_IMAGE_MSG	=	(yat::FIRST_USER_MSG + 200);
+const size_t  GET_IMAGE_MSG		=	(yat::FIRST_USER_MSG + 200);
 const size_t  BACKGROUND_FRAME_MSG	=	(yat::FIRST_USER_MSG + 300);
 
 //- task period (in ms)
@@ -81,7 +81,7 @@ Camera::Camera(const std::string& camera_ip, size_t port_num, const std::string&
 	_port_num(port_num),
 	_image_path(img_path),
 	_image_name(img_name),
-  _image_dir_watcher_path(img_dir_watcher),
+  	_image_dir_watcher_path(img_dir_watcher),
 	_marccd_state(TASK_STATE_IDLE),
 	m_status(Camera::Unknown),
 	_image_number(0),
