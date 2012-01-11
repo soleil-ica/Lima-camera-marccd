@@ -22,7 +22,6 @@
           <configuration>
             <cpp>
               <defines>
-                <define>BOOST_ALL_DYN_LINK</define>
                 <define>LOG4TANGO_HAVE_INT64_T</define>
               </defines>
             </cpp>
@@ -35,10 +34,6 @@
     <dependency>
       <groupId>uk.ac.ccp4</groupId>
       <artifactId>DiffractionImage-${aol}-shared-release</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.boost</groupId>
-      <artifactId>Boost-libraries-${aol}-shared-${mode}</artifactId>
     </dependency>
   </dependencies>
 

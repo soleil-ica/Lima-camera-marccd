@@ -73,25 +73,24 @@ class BufferCtrlObj : public HwBufferCtrlObj
 	virtual void getStartTimestamp(Timestamp& start_ts);
 	virtual void getFrameInfo(int acq_frame_nb, HwFrameInfoType& info);
 
-    // -- Buffer control object
-    BufferCtrlMgr&      getBufferMgr(){return m_buffer_ctrl_mgr;};
-    StdBufferCbMgr&     getBufferCbMgr(){return m_buffer_cb_mgr;};
+	// -- Buffer control object
+	BufferCtrlMgr&      getBufferMgr(){return m_buffer_ctrl_mgr;};
+	StdBufferCbMgr&     getBufferCbMgr(){return m_buffer_cb_mgr;};
     
 	virtual void registerFrameCallback(HwFrameCallback& frame_cb);
 	virtual void unregisterFrameCallback(HwFrameCallback& frame_cb);
   
   // Reader stuff
-    void start();
-    void stop();
-    void reset();
-    int  getLastAcquiredFrame();    
+	void update_image_from_file();
+	void reset();
+	int  getLastAcquiredFrame();    
 
  private:
-    SoftBufferAllocMgr      m_buffer_alloc_mgr;
-    StdBufferCbMgr          m_buffer_cb_mgr;
-    BufferCtrlMgr           m_buffer_ctrl_mgr;
-    Camera&                 m_cam;
-    Reader*                 m_reader;    
+	 SoftBufferAllocMgr      m_buffer_alloc_mgr;
+	 StdBufferCbMgr          m_buffer_cb_mgr;
+	 BufferCtrlMgr           m_buffer_ctrl_mgr;
+	 Camera&                 m_cam;
+	 Reader*                 m_reader;    
 };
 
 //*******************************************************************
@@ -161,23 +160,18 @@ class Interface : public HwInterface
 	virtual void 	prepareAcq();
 	virtual void 	startAcq();
 	virtual void 	stopAcq();
-	virtual void  	takeBackgroundFrame();
+	virtual void  takeBackgroundFrame();
 	virtual void 	getStatus(StatusType& status);
 	virtual int 	getNbHwAcquiredFrames();
-
 	virtual void	getFrameRate(double& frame_rate);
 	
-	//- To be deleted : done in BinCtrlObj (see above) !!!
-	//virtual void	setBinning(unsigned short bin);
-	//virtual void	getBinning(unsigned short& bin);
-
  private:
-	Camera&				m_cam;
-	CapList 			m_cap_list;
-	DetInfoCtrlObj		m_det_info;
+	Camera&				  m_cam;
+	CapList 			  m_cap_list;
+	DetInfoCtrlObj	m_det_info;
 	BufferCtrlObj		m_buffer;
 	SyncCtrlObj			m_sync;
-	BinCtrlObj      	m_bin;
+	BinCtrlObj      m_bin;
 
 };
 

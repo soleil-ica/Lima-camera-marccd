@@ -134,7 +134,7 @@ BufferCtrlObj::BufferCtrlObj(Camera& cam)
 BufferCtrlObj::~BufferCtrlObj()
 {
 	DEB_DESTRUCTOR();
-  m_reader->stop();
+  m_reader->reset();
   m_reader->exit();  
 }
 
@@ -258,19 +258,11 @@ void BufferCtrlObj::unregisterFrameCallback(HwFrameCallback& frame_cb)
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
-void BufferCtrlObj::start()
+void BufferCtrlObj::update_image_from_file()
 {
     DEB_MEMBER_FUNCT();
+		//- start thread which get the new image from file
     m_reader->start();
-}
-
-//-----------------------------------------------------
-//
-//-----------------------------------------------------
-void BufferCtrlObj::stop()
-{
-  DEB_MEMBER_FUNCT();
-  m_reader->stop();
 }
 
 //-----------------------------------------------------
@@ -507,7 +499,6 @@ void Interface::startAcq()
 {
 	DEB_MEMBER_FUNCT();
 	m_cam.start();
-  m_buffer.start();    
 }
 
 //-----------------------------------------------------
@@ -517,7 +508,7 @@ void Interface::stopAcq()
 {
 	DEB_MEMBER_FUNCT();
 	m_cam.stop();
-  m_buffer.stop();    
+  m_buffer.update_image_from_file();    
 }
 
 //-----------------------------------------------------
@@ -593,23 +584,3 @@ void Interface::getFrameRate(double& frame_rate)
 	DEB_MEMBER_FUNCT();
 	m_cam.getFrameRate(frame_rate);
 }
-
-////-----------------------------------------------------
-////
-////-----------------------------------------------------
-//void Interface::getBinning(unsigned short& bin)
-//{
-//	DEB_MEMBER_FUNCT();
-//	m_cam.getBinning(bin);
-//}
-//
-////-----------------------------------------------------
-////
-////-----------------------------------------------------
-//void Interface::setBinning(unsigned short bin)
-//{
-//	DEB_MEMBER_FUNCT();
-//	m_cam.setBinning(bin);
-//}
-
-//-----------------------------------------------------

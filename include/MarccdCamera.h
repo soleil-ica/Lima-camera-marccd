@@ -85,15 +85,23 @@ namespace lima
 			void setBinning(const Bin&);
 			void getBinning(Bin&);
       
+			inline bool is_stop_sequence_finished() {
+				return this->_stop_sequence_finished;
+			}
       const std::string& getDirectoryWatcherPath(void);
+
+			const std::string& getImageFileName(void);
+
+      const std::string& getFullImgName();
+
 		protected:
 			virtual void setMaxImageSizeCallbackActive(bool cb_active);	
 
 			//- yat::Task implementation
 			virtual void handle_message( yat::Message& msg )      throw (yat::Exception);
 		private:
-			void GetImage();
-			void FreeImage();
+			//void GetImage();
+			//void FreeImage();
 
 			/**
 			* Disconnect from the current socket
@@ -133,9 +141,7 @@ namespace lima
 			void perform_background_frame();
 
 			int convertStringToInt( char* hexa_text );
-			
-      static const double PixelSize= 39.795; //- NOT PRIVATE !??
-      
+			      
 			//- mutex to protect file against read image from device and
 			//-		marccd acquisition
 			yat::Mutex 	        _lock;
@@ -145,6 +151,7 @@ namespace lima
 			std::string         _image_path;
 			std::string         _image_name;
 			std::string         _image_dir_watcher_path;
+      std::string         _full_img_name;
 			
 
 
@@ -159,13 +166,15 @@ namespace lima
 			size_t _marccd_state;
 			Camera::Status		  m_status;
 			int							    _image_number;
-			bool						    _stop_already_done;
+			//bool						    _stop_already_done;
 
 			//- Marccd stuff 
 			std::string		      _camera_ip;
 			size_t				      _port_num;
 			std::string 	      _detector_model;
 			std::string 	      _detector_type;
+
+			bool								_stop_sequence_finished;
 		};
 
 	} //- namespace Marccd

@@ -8,16 +8,6 @@
 #include <yat/threading/Task.h>
 #include <DiffractionImage.h>			//- to read back img data
 
-#define kLO_WATER_MARK      128
-#define kHI_WATER_MARK      512
-
-#define kPOST_MSG_TMO       2
-
-#define kTASK_PERIODIC_TIMEOUT_MS   1000
-const size_t  MARCCD_START_MSG     =   (yat::FIRST_USER_MSG + 300);
-const size_t  MARCCD_STOP_MSG      =   (yat::FIRST_USER_MSG + 301);
-const size_t  MARCCD_RESET_MSG     =   (yat::FIRST_USER_MSG + 302);
-
 ///////////////////////////////////////////////////////////
 
 
@@ -55,12 +45,10 @@ class Reader : public yat::Task
     DEB_CLASS_NAMESPC(DebModCamera, "Reader", "Marccd");
 
  public:
-
     Reader(Camera& cam, HwBufferCtrlObj& buffer_ctrl);
     ~Reader();
 
     void start();
-    void stop();
     void reset();
     int  getLastAcquiredFrame(void);
 
@@ -68,25 +56,25 @@ class Reader : public yat::Task
   protected: 
     virtual void handle_message( yat::Message& msg )    throw (yat::Exception);
 
- private:
+		virtual void getImageFromFile();
 
+ private:
     //- Mutex
     yat::Mutex                  lock_;
     yat::Mutex                  contextual_lock_;
     Camera&                     m_cam;
     HwBufferCtrlObj&            m_buffer;
     int                         m_image_number;
-    bool                        m_stop_already_done;
-    int                         m_elapsed_seconds_from_stop;
-    gdshare::DirectoryWatcher*  m_dw;
     
-    //Loading image stuff!
+    //- Loading image stuff!
     Size                        m_image_size;
-	DI::DiffractionImage*       m_DI;    
+		DI::DiffractionImage*       m_DI;
+
+		std::string									_currentImgFileName;	//- new image to read
+		std::string									_previousImgFileName;	//- last image read
 
 };
-} // namespace Pilatus
+} // namespace Marccd
 } // namespace lima
-
 
 #endif // MARCCDREADER_H
