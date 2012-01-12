@@ -16,8 +16,6 @@
 
 #include "Debug.h"
 #include "Data.h"
-#include <base.h>
-#include <file.h>
 
 #include "HwMaxImageSizeCallback.h"
 #include "MarccdCamera.h"
