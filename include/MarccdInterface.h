@@ -40,7 +40,14 @@ class DetInfoCtrlObj : public HwDetInfoCtrlObj
 	virtual void unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
 
  private:
+	class MaxImageSizeCallbackGen : public HwMaxImageSizeCallbackGen
+	{
+	protected:
+		virtual void setMaxImageSizeCallbackActive(bool cb_active);
+	};
+
 	Camera& m_cam;
+	MaxImageSizeCallbackGen m_mis_cb_gen;
 };
 
 
@@ -81,9 +88,14 @@ class BufferCtrlObj : public HwBufferCtrlObj
 	virtual void unregisterFrameCallback(HwFrameCallback& frame_cb);
   
   // Reader stuff
-	void update_image_from_file();
+	void update_image_from_file();	//- (i.e. cmd Start)
 	void reset();
 	int  getLastAcquiredFrame();    
+	bool isTimeoutSignaled(void);
+	bool isRunning(void);
+	void setTimeout(int TO);
+	void enableReader(void);
+	void disableReader(void);
 
  private:
 	 SoftBufferAllocMgr      m_buffer_alloc_mgr;
@@ -164,6 +176,23 @@ class Interface : public HwInterface
 	virtual void 	getStatus(StatusType& status);
 	virtual int 	getNbHwAcquiredFrames();
 	virtual void	getFrameRate(double& frame_rate);
+	
+	void setLastImage(int last_image);
+	int	 getLastImage(void);		
+	
+	void setImageFileName(const string& name);
+	const string& 	getImageFileName(void);
+	
+	void setImagePath(const string& path);
+	const string& 	getImagePath(void);
+	
+	//- Reader task timeout to process image from file
+	void setTimeout(int TO);
+	
+	//- get MARCCD image from file
+	void enableReader(void);
+	//- get a simulated image
+	void disableReader(void);
 	
  private:
 	Camera&				  m_cam;

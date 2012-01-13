@@ -46,7 +46,7 @@ namespace lima
 				Unknown
 			};
 
-			Camera(const std::string& camera_ip, size_t port_number, const std::string& img_path, const std::string& img_name,const std::string& img_dir_watcher);
+			Camera(const std::string& camera_ip, size_t port_number, const std::string& img_path, const std::string& img_name);
 			virtual ~Camera();
 
 			void start();
@@ -88,9 +88,14 @@ namespace lima
 			inline bool is_stop_sequence_finished() {
 				return this->_stop_sequence_finished;
 			}
-      const std::string& getDirectoryWatcherPath(void);
 
-			const std::string& getImageFileName(void);
+			void  setImagePath(const std::string& path);
+			const std::string&  getImagePath(void);
+
+      const std::string& getDirectoryWatcherPath();
+
+			void setImageFileName(const std::string& imgName);
+			const std::string& getImageFileName();
 
       const std::string& getFullImgName();
 
@@ -150,7 +155,6 @@ namespace lima
 			
 			std::string         _image_path;
 			std::string         _image_name;
-			std::string         _image_dir_watcher_path;
       std::string         _full_img_name;
 			
 

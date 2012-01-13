@@ -99,20 +99,27 @@ void DetInfoCtrlObj::getDetectorModel(std::string& model)
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
-void DetInfoCtrlObj::registerMaxImageSizeCallback(HwMaxImageSizeCallback& )
+void DetInfoCtrlObj::registerMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 {
   DEB_MEMBER_FUNCT();
+	m_mis_cb_gen.registerMaxImageSizeCallback(cb);
 }
 
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
-void DetInfoCtrlObj::unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& )
+void DetInfoCtrlObj::unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 {
   DEB_MEMBER_FUNCT();
+	m_mis_cb_gen.unregisterMaxImageSizeCallback(cb);
 }
 
-
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void DetInfoCtrlObj::MaxImageSizeCallbackGen::setMaxImageSizeCallbackActive(bool )
+{
+}
 
 /*******************************************************************
  * \brief BufferCtrlObj constructor
@@ -280,6 +287,49 @@ void BufferCtrlObj::reset()
 int BufferCtrlObj::getLastAcquiredFrame()
 {
   return m_reader->getLastAcquiredFrame();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+bool BufferCtrlObj::isTimeoutSignaled()
+{
+    return m_reader->isTimeoutSignaled();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+bool BufferCtrlObj::isRunning()
+{
+    return m_reader->isRunning();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void BufferCtrlObj::setTimeout(int TO)
+{
+    DEB_MEMBER_FUNCT();
+    m_reader->setTimeout(TO);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void BufferCtrlObj::enableReader(void)
+{
+    DEB_MEMBER_FUNCT();
+	m_reader->enableReader();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void BufferCtrlObj::disableReader(void)
+{
+    DEB_MEMBER_FUNCT();
+	m_reader->disableReader();
 }
 
 /*******************************************************************
@@ -569,10 +619,7 @@ void Interface::getStatus(StatusType& status)
 int Interface::getNbHwAcquiredFrames()
 {
 	DEB_MEMBER_FUNCT();
-	//Acq::Status acq_status;
-	//m_acq.getStatus(acq_status);
-	//int nb_hw_acq_frames = acq_status.last_frame_nb + 1;
-	//DEB_RETURN() << DEB_VAR1(nb_hw_acq_frames);
+	int acq_frames = m_buffer.getLastAcquiredFrame();
 	return 0;
 }
 
@@ -584,3 +631,40 @@ void Interface::getFrameRate(double& frame_rate)
 	DEB_MEMBER_FUNCT();
 	m_cam.getFrameRate(frame_rate);
 }
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setImageFileName(const std::string& name)
+{
+	DEB_MEMBER_FUNCT();
+	m_cam.setImageFileName(name);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+const std::string& Interface::getImageFileName(void)
+{
+	DEB_MEMBER_FUNCT();
+	return m_cam.getImageFileName();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setImagePath(const std::string& path)
+{
+	DEB_MEMBER_FUNCT();
+	m_cam.setImagePath(path);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+const std::string& Interface::getImagePath(void)
+{
+	DEB_MEMBER_FUNCT();
+	return m_cam.getImagePath();
+}
+

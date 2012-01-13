@@ -76,12 +76,11 @@ enum {
 //---------------------------
 //- Ctor
 //---------------------------
-Camera::Camera(const std::string& camera_ip, size_t port_num, const std::string& img_path, const std::string& img_name, const std::string& img_dir_watcher)
+Camera::Camera(const std::string& camera_ip, size_t port_num, const std::string& img_path, const std::string& img_name)
 : yat::Task(),
 	_sock(0),
 	_image_path(img_path),
 	_image_name(img_name),
-  _image_dir_watcher_path(img_dir_watcher),
   _full_img_name(""),
 	m_nb_frames(0),
 	m_image_size(0),
@@ -1036,11 +1035,27 @@ void Camera::get_marccd_state()
 }
 
 //-----------------------------------------------------
-// - getDirectoryWatcherPath
+// - setImagePath
 //-----------------------------------------------------
-const std::string& Camera::getDirectoryWatcherPath(void)
+void Camera::setImagePath(const std::string& imgPath)
 {
-  return this->_image_dir_watcher_path;
+  this->_image_path = imgPath;
+}
+
+//-----------------------------------------------------
+// - getImagePath
+//-----------------------------------------------------
+const std::string& Camera::getImagePath(void)
+{
+  return this->_image_path;
+}
+
+//-----------------------------------------------------
+// - setImageFileName
+//-----------------------------------------------------
+void Camera::setImageFileName(const std::string& imgName)
+{
+  this->_image_name = imgName;
 }
 
 //-----------------------------------------------------
@@ -1056,6 +1071,7 @@ const std::string& Camera::getImageFileName(void)
 //-----------------------------------------------------
 const std::string& Camera::getFullImgName()
 {
+	//- image name = full path + image name + "_" + image index
 std::cout << "\t\tCamera::getFullImgName() = " << this->_full_img_name << std::endl;
   return this->_full_img_name;
 }
