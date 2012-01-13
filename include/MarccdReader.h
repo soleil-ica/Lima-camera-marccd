@@ -6,6 +6,7 @@
 // YAT::TASK 
 ///////////////////////////////////////////////////////////
 #include <yat/threading/Task.h>
+#include <yat/time/Timer.h>
 #include <DiffractionImage.h>			//- to read back img data
 
 ///////////////////////////////////////////////////////////
@@ -42,36 +43,55 @@ namespace Marccd
 
 class Reader : public yat::Task
 {
-    DEB_CLASS_NAMESPC(DebModCamera, "Reader", "Marccd");
+	DEB_CLASS_NAMESPC(DebModCamera, "Reader", "Marccd");
 
- public:
-    Reader(Camera& cam, HwBufferCtrlObj& buffer_ctrl);
-    ~Reader();
+public:
+	//- CTOR
+	Reader(Camera& cam, HwBufferCtrlObj& buffer_ctrl);
+	//- DTOR
+	~Reader();
 
-    void start();
-    void reset();
-    int  getLastAcquiredFrame(void);
+	//- begin sequence to acquire an image
+	void start();
+	//- clear data
+	void reset();
+	//- return curent image index
+	int  getLastAcquiredFrame();
+	//- return true if reader can not read image file during a "Timeout"
+	bool isTimeoutSignaled();
+	//- return true if reader is processing image file
+	bool isRunning();
+	//- define max allowed time to read image file
+	void setTimeout(double);
+	//- allow using diffraction image to open image file
+	void enableReader();
+	//- use simulated image (all pixels sets to 0)
+	void disableReader();
 
-  //- [yat::Task implementation]
-  protected: 
-    virtual void handle_message( yat::Message& msg )    throw (yat::Exception);
+	//- [yat::Task implementation]
+protected: 
+	virtual void handle_message( yat::Message& msg )    throw (yat::Exception);
 
-		virtual void getImageFromFile();
+	//- read Marccd image from a file and update device image attribute
+	virtual void getImageFromFile();
 
- private:
-    //- Mutex
-    yat::Mutex                  lock_;
-    yat::Mutex                  contextual_lock_;
-    Camera&                     m_cam;
-    HwBufferCtrlObj&            m_buffer;
-    int                         m_image_number;
-    
-    //- Loading image stuff!
-    Size                        m_image_size;
-		DI::DiffractionImage*       m_DI;
+private:
+	void initializeReader();
 
-		std::string									_currentImgFileName;	//- new image to read
-		std::string									_previousImgFileName;	//- last image read
+	//- Mutex
+	yat::Mutex                  _lock;
+	Camera&                     _cam;
+	HwBufferCtrlObj&            _buffer;
+	int                         _image_number;
+
+	//- Loading image stuff!
+	Size                        _image_size;
+	std::string									_currentImgFileName;	//- new image to read
+	uint16_t*                   _simulated_image;
+	bool												_is_reader_open_image_file;	//- FALSE : to return a simulated image !
+
+	//- Timeout management (while processing image file)
+	yat::Timeout*								_tmOut;
 
 };
 } // namespace Marccd

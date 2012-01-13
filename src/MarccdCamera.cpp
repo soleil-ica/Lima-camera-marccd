@@ -79,15 +79,19 @@ enum {
 Camera::Camera(const std::string& camera_ip, size_t port_num, const std::string& img_path, const std::string& img_name, const std::string& img_dir_watcher)
 : yat::Task(),
 	_sock(0),
-	_camera_ip(camera_ip),
-	_port_num(port_num),
 	_image_path(img_path),
 	_image_name(img_name),
   _image_dir_watcher_path(img_dir_watcher),
   _full_img_name(""),
+	m_nb_frames(0),
+	m_image_size(0),
+	m_trigger_type(0),
+	m_exp_time(0),
 	_marccd_state(TASK_STATE_IDLE),
 	m_status(Camera::Unknown),
 	_image_number(0),
+	_camera_ip(camera_ip),
+	_port_num(port_num),
 	_detector_model(""),
 	_detector_type(""),
 	_stop_sequence_finished(false)
@@ -422,7 +426,7 @@ void Camera::getDetectorModel(std::string& type)
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
-void Camera::setMaxImageSizeCallbackActive(bool cb_active)
+void Camera::setMaxImageSizeCallbackActive(bool )
 {
 
 }
