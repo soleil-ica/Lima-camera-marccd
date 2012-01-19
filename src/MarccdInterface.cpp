@@ -577,37 +577,45 @@ void Interface::getStatus(StatusType& status)
 {
 	Camera::Status marccd_status = Camera::Unknown;
 	
-	m_cam.getStatus(marccd_status);
 
 ////std::cout << "\t***** Interface::getStatus -> MARCCD status = " << marccd_status << std::endl;
 
-	switch (marccd_status)
+	if( this->m_buffer.isRunning() )
 	{
+		status.acq = AcqRunning;
+		status.det = DetExposure;
+	}
+	else
+	{
+		m_cam.getStatus(marccd_status);
+		switch (marccd_status)
+		{
 		case Camera::Ready:
 			status.acq = AcqReady;
 			status.det = DetIdle;
-		break;
+			break;
 
 		case Camera::Exposure:
 			status.acq = AcqRunning;
 			status.det = DetExposure;
-		break;
+			break;
 
 		case Camera::Readout:
 			status.acq = AcqRunning;
 			status.det = DetReadout;
-		break;
+			break;
 
 		case Camera::Latency:
 			status.acq = AcqRunning;
 			status.det = DetLatency;
-		break;
+			break;
 
 		case Camera::Unknown:
 		case Camera::Fault:
 			status.acq = AcqFault;
 			status.det = DetFault;
-		break;
+			break;
+		}
 	}
 	status.det_mask = DetExposure | DetReadout | DetLatency | DetFault;
 /////std::cout << "\t***** Interface::getStatus -> StatusType = " << status.acq << std::endl;
@@ -620,7 +628,7 @@ int Interface::getNbHwAcquiredFrames()
 {
 	DEB_MEMBER_FUNCT();
 	int acq_frames = m_buffer.getLastAcquiredFrame();
-	return 0;
+	return acq_frames;
 }
 
 //-----------------------------------------------------
@@ -666,5 +674,23 @@ const std::string& Interface::getImagePath(void)
 {
 	DEB_MEMBER_FUNCT();
 	return m_cam.getImagePath();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setImageIndex(int imgIdx)
+{
+	DEB_MEMBER_FUNCT();
+	this->m_cam.setImageIndex(imgIdx);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+int Interface::getImageIndex()
+{
+	DEB_MEMBER_FUNCT();
+	return m_cam.getImageIndex();
 }
 

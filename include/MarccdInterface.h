@@ -177,8 +177,8 @@ class Interface : public HwInterface
 	virtual int 	getNbHwAcquiredFrames();
 	virtual void	getFrameRate(double& frame_rate);
 	
-	void setLastImage(int last_image);
-	int	 getLastImage(void);		
+	void setImageIndex(int imgIdx);
+	int	 getImageIndex(void);		
 	
 	void setImageFileName(const string& name);
 	const string& 	getImageFileName(void);

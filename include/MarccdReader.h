@@ -74,7 +74,6 @@ protected:
 	virtual void getImageFromFile();
 
 private:
-	void initializeReader();
 
 	//- Mutex
 	yat::Mutex                  _lock;

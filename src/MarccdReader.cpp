@@ -168,7 +168,6 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
       case yat::TASK_INIT:
       {
         DEB_TRACE() <<"Reader::->TASK_INIT";
-				this->initializeReader();
 				//- create timeout
 				this->_tmOut = new yat::Timeout();
 				//- set unit in seconds

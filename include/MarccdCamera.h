@@ -46,7 +46,10 @@ namespace lima
 				Unknown
 			};
 
-			Camera(const std::string& camera_ip, size_t port_number, const std::string& img_path, const std::string& img_name);
+			Camera(const std::string& camera_ip, 
+						 size_t port_number, 
+						 const std::string& img_path, 
+						 const std::string& img_name);
 			virtual ~Camera();
 
 			void start();
@@ -98,6 +101,13 @@ namespace lima
 			const std::string& getImageFileName();
 
       const std::string& getFullImgName();
+
+			void setImageIndex(int newImgIdx) {
+				this->_image_number = newImgIdx;
+			}
+			int getImageIndex() {
+				return this->_image_number;
+			}
 
 		protected:
 			virtual void setMaxImageSizeCallbackActive(bool cb_active);	

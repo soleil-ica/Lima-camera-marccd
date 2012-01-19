@@ -143,12 +143,11 @@ void Camera::handle_message( yat::Message& msg )  throw( yat::Exception )
 				}
 				catch (yat::Exception &ye)
 				{
+					this->enable_periodic_msg(false);
 					//this->status_str = "Camera::Camera : device initialization failed caught DevFailed trying to create yat::Socket\n";
 					if ( _sock )
-					{
 						delete _sock;
-						_sock = 0;
-					}
+					_sock = 0;
 std::cout << "Camera::Camera : Camera::handle_message initialization failed caught yat::Exception trying to create yat::ClientSocket" 
 						<< "\n\t_sock = " << _sock
 						<< std::endl;
@@ -157,13 +156,12 @@ std::cout << " caught YAT Exception [" << ye.errors[0].desc << "]" << std::endl;
 				}
 				catch (...)
 				{
+					this->enable_periodic_msg(false);
 std::cout << "Camera::handle_message : Camera initialization failed caught ... trying to create yat::ClientSocket" << std::endl;
 					//this->status_str = "Camera::init_device : device initialization failed caught ... trying to create yat::Socket\n";
 					if ( _sock )
-					{
 						delete _sock;
-						_sock = 0;
-					}
+					_sock = 0;
 					return;
 				}
 
@@ -274,6 +272,9 @@ void Camera::start()
 	DEB_MEMBER_FUNCT();
 	std::cout <<"Camera::start() - ENTERING ..." << std::endl;
 
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
+
 	//- prepare msg
 	yat::Message * msg = new yat::Message(START_MSG, MAX_USER_PRIORITY);
 	if ( !msg )
@@ -295,6 +296,9 @@ void Camera::stop()
 {
 	DEB_MEMBER_FUNCT();
 	std::cout << "Camera::stop() - ENTERING ..." << std::endl;
+
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
 
 	//- prepare msg
 	yat::Message * msg = new yat::Message(STOP_MSG, MAX_USER_PRIORITY);
@@ -318,6 +322,9 @@ void Camera::take_background_frame()
 {
 	DEB_MEMBER_FUNCT();
 	std::cout << "Camera::take_background_frame() - ENTERING ..." << std::endl;
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
+
 
 	//- prepare msg
 	yat::Message * msg = new yat::Message(BACKGROUND_FRAME_MSG, MAX_USER_PRIORITY);
@@ -364,9 +371,11 @@ void Camera::getImageSize(Size& size)
 {
 	DEB_MEMBER_FUNCT();
 
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
+
 	std::string resp ("");
 	int sizeX, sizeY;
-
 	try
 	{
 		yat::MutexLock scoped_lock(this->_lock);
@@ -608,6 +617,9 @@ void Camera::setBinning(const Bin &bin)
 	std::string cmd_to_send("set_bin,");
 	std::stringstream bin_values;
 
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
+
 	//- This is MarCCD supported bin values : "1,1" ; "2,2" ; "3,3" ; "4,4" ; "8,8" ;
 	try
 	{
@@ -635,6 +647,9 @@ void Camera::setBinning(const Bin &bin)
 void Camera::getBinning(Bin& bin)
 {
 	DEB_MEMBER_FUNCT();
+
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
 
 	std::string resp ("");
 	int binX, binY;
