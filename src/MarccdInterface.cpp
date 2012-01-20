@@ -127,8 +127,8 @@ void DetInfoCtrlObj::MaxImageSizeCallbackGen::setMaxImageSizeCallbackActive(bool
 
 BufferCtrlObj::BufferCtrlObj(Camera& cam)
 	:   m_buffer_cb_mgr(m_buffer_alloc_mgr),
-        m_buffer_ctrl_mgr(m_buffer_cb_mgr),
-        m_cam(cam)
+      m_buffer_ctrl_mgr(m_buffer_cb_mgr),
+      m_cam(cam)
 {
 	DEB_CONSTRUCTOR();
   m_reader = new Reader(cam,*this);

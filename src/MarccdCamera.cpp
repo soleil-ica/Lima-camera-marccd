@@ -76,11 +76,13 @@ enum {
 //---------------------------
 //- Ctor
 //---------------------------
-Camera::Camera(const std::string& camera_ip, size_t port_num, const std::string& img_path, const std::string& img_name)
+Camera::Camera(const std::string& camera_ip, 
+							 size_t port_num, 
+							 const std::string& img_path)
 : yat::Task(),
 	_sock(0),
 	_image_path(img_path),
-	_image_name(img_name),
+	_image_name(""),
   _full_img_name(""),
 	m_nb_frames(0),
 	m_image_size(0),
