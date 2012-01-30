@@ -399,10 +399,10 @@ void Camera::getImageSize(Size& size)
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
-void Camera::getPixelSize(double& size)
+void Camera::getPixelSize(double& x_size,double& y_size)
 {
 	DEB_MEMBER_FUNCT();
-	size = PixelSize;
+	x_size = y_size = PixelSize;
 }
 
 //-----------------------------------------------------
