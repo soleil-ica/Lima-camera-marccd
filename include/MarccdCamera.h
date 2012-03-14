@@ -165,7 +165,7 @@ namespace lima
 			
 			std::string         _image_path;
 			std::string         _image_name;
-      std::string         _full_img_name;
+      std::string         _full_img_name; // = img path + img name + img idx
 			
 
 
@@ -189,8 +189,9 @@ namespace lima
 			std::string 	      _detector_type;
 
 			bool								_stop_sequence_finished;
-		};
 
+			std::string					_error;
+		};
 	} //- namespace Marccd
 } // namespace lima
 

@@ -95,7 +95,8 @@ Camera::Camera(const std::string& camera_ip,
 	_port_num(port_num),
 	_detector_model(""),
 	_detector_type(""),
-	_stop_sequence_finished(false)
+	_stop_sequence_finished(false),
+	_error("")
 {
 	DEB_CONSTRUCTOR();
 
@@ -142,10 +143,15 @@ void Camera::handle_message( yat::Message& msg )  throw( yat::Exception )
 					_sock = new yat::ClientSocket ();
 					//- connect to MARCCD device
 					this->connect();
+					//- no error
+					this->_error.clear();
 				}
 				catch (yat::Exception &ye)
 				{
+					//- disable periodic msg
 					this->enable_periodic_msg(false);
+					//- update error
+					this->_error = ye.errors[0].desc;
 					//this->status_str = "Camera::Camera : device initialization failed caught DevFailed trying to create yat::Socket\n";
 					if ( _sock )
 						delete _sock;
@@ -153,13 +159,16 @@ void Camera::handle_message( yat::Message& msg )  throw( yat::Exception )
 std::cout << "Camera::Camera : Camera::handle_message initialization failed caught yat::Exception trying to create yat::ClientSocket" 
 						<< "\n\t_sock = " << _sock
 						<< std::endl;
-std::cout << " caught YAT Exception [" << ye.errors[0].desc << "]" << std::endl;
+std::cout << " caught YAT Exception [" << this->_error << "]" << std::endl;
 					return;
 				}
 				catch (...)
 				{
+					//- disable periodic msg
 					this->enable_periodic_msg(false);
-std::cout << "Camera::handle_message : Camera initialization failed caught ... trying to create yat::ClientSocket" << std::endl;
+					//- update error
+					this->_error = "Camera initialization failed caught ... trying to create yat::ClientSocket";
+std::cout << "Camera::handle_message : " << this->_error << std::endl;
 					//this->status_str = "Camera::init_device : device initialization failed caught ... trying to create yat::Socket\n";
 					if ( _sock )
 						delete _sock;
@@ -167,6 +176,7 @@ std::cout << "Camera::handle_message : Camera initialization failed caught ... t
 					return;
 				}
 
+				//- all is OK
 				if ( this->_sock )
 				{
 					this->enable_periodic_msg(true);
@@ -348,6 +358,9 @@ void Camera::take_background_frame()
 //---------------------------
 void Camera::prepare()
 {
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
+
 	//- Method to take a backround image. This background will be substacted to each
 	//-  taken images !
 	//- TODO periodically ?! If so, period(in ms) = ?
@@ -859,11 +872,7 @@ std::string Camera::write_read(std::string cmd_to_send)
 {
 	//- check if connection is up
 	if( !this->_sock )
-	{
-		//        status = Camera::Fault;
-std::cout << "Camera::write_read -> no _sock !" << std::endl;
-		throw;
-	}
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
 	
 	std::string response("");
 	//- send command
@@ -1036,6 +1045,9 @@ std::cout << "Camera::perform_background_frame -> \n\n" << std::endl;
 //-----------------------------------------------------
 void Camera::get_marccd_state()
 {
+	if( !this->_sock )
+		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
+
 	std::string stateStr("");
 	//- get detector state string value
 	{

@@ -284,6 +284,6 @@ void Reader::getImageFromFile ()
 	HwFrameInfoType frame_info;
 	frame_info.acq_frame_nb = this->_image_number++;
 	buffer_mgr.newFrameReady(frame_info);
-	std::cout << "\t\t\tnew frame ready" << std::endl;                     
+	std::cout << "\t\t\tReader::getImageFromFile -> new frame ready" << std::endl;                     
 }
 
