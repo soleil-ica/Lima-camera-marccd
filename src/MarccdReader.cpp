@@ -15,8 +15,8 @@
 
 #define kPOST_MSG_TMO       2
 
-const size_t kTASK_PERIODIC_TIMEOUT_MS	 =  1000;
-const double kDEFAULT_READER_TIMEOUT_SEC = 60.;
+const size_t kTASK_PERIODIC_TIMEOUT_MS	 =  500;
+const double kDEFAULT_READER_TIMEOUT_SEC = 30.;
 const size_t MARCCD_START_MSG     =   (yat::FIRST_USER_MSG + 300);
 const size_t MARCCD_RESET_MSG     =   (yat::FIRST_USER_MSG + 302);
 
@@ -200,13 +200,14 @@ void Reader::handle_message( yat::Message& msg )  throw( yat::Exception )
 					this->enable_periodic_msg(false);
 					//- disable timeout
 					this->_tmOut->disable();
+std::cout << "FATAL::Failed to load image : " << this->_currentImgFileName << std::endl;
 					return;
 				}
 				//- check if file exist
 				std::ifstream imgFile(this->_currentImgFileName.c_str());
 				if ( imgFile )
 				{
-std::cout << "\t\t\t Reader::->imgFile exist ..." << std::endl;
+std::cout << "\t\t\t Reader::->imgFile exist : " << this->_currentImgFileName << std::endl;
 					//- read image file
 					this->getImageFromFile();
 					//- disable periodic msg
@@ -215,7 +216,7 @@ std::cout << "\t\t\t Reader::->TASK_PERIODIC ... DONE !!!" << std::endl;
 				}
 				else 
 				{ 
-					std::cout << "\t\t\t Reader::->imgFile DOES NOT exist ..." << std::endl;
+std::cout << "\t\t\t Reader::->imgFile DOES NOT exist : " << this->_currentImgFileName << std::endl;
 				}
 			}
       break;
@@ -225,10 +226,16 @@ std::cout << "\t\t\t Reader::->TASK_PERIODIC ... DONE !!!" << std::endl;
         DEB_TRACE() << "Reader::->MARCCD_START_MSG";
 				//- get full image name as full/path/imgName_idx
 				this->_currentImgFileName = this->_cam.getFullImgName();
-				//- enable periodic msg
-        this->enable_periodic_msg(true);
-				//- re-arm timeout
-				this->_tmOut->restart();
+        if ( this->_is_reader_open_image_file )
+	{
+		//- enable periodic msg
+        	this->enable_periodic_msg(true);
+		//- re-arm timeout
+		this->_tmOut->restart();
+	}
+	else
+	        //- disable periodic msg
+        	this->enable_periodic_msg(false);
 std::cout << "\t\t\t Reader::->MARCCD_START_MSG DONE for image name : " << this->_currentImgFileName << std::endl;
       }
       break;
@@ -266,7 +273,7 @@ void Reader::getImageFromFile ()
 	DI::DiffractionImage tmpDI( const_cast<char*>(this->_currentImgFileName.c_str()) );
 	//tmpDI.open(const_cast<char*>(this->_currentImgFileName.c_str()));
 
-	//std::cout << "\t\t\tm_image_size.getWidth() = " << m_image_size.getWidth() << " & m_image_size.getHeight() = " << m_image_size.getHeight() << std::endl;
+	std::cout << "\t\t\tm_image_size.getWidth() = " << _image_size.getWidth() << " & m_image_size.getHeight() = " << _image_size.getHeight() << std::endl;
 	//std::cout << "\t\t\tm_DI->getWidth() = " << m_DI->getWidth() << " & m_DI->getHeight() = " << m_DI->getHeight() << std::endl;
 
 	if( this->_image_size.getWidth() != tmpDI.getWidth() || this->_image_size.getHeight() != tmpDI.getHeight())
@@ -284,6 +291,6 @@ void Reader::getImageFromFile ()
 	HwFrameInfoType frame_info;
 	frame_info.acq_frame_nb = this->_image_number++;
 	buffer_mgr.newFrameReady(frame_info);
-	std::cout << "\t\t\tReader::getImageFromFile -> new frame ready" << std::endl;                     
+	std::cout << "\t\t\tReader::getImageFromFile DONE -> img name : " << this->_currentImgFileName << std::endl;                     
 }
 

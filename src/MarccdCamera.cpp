@@ -181,6 +181,13 @@ std::cout << "Camera::handle_message : " << this->_error << std::endl;
 				{
 					this->enable_periodic_msg(true);
 					this->set_periodic_msg_period( kPERIODIC_MSG_PERIOD );
+
+					//- get image size to initialize ROI
+					Size size;
+					this->getImageSize(size);
+					std::cout << "Set the ROI to full frame" << std::endl;
+					Roi aFullFrame(0,0,size.getWidth(),size.getHeight());
+					this->setRoi(aFullFrame);
 				}
 				else
 					std::cout << " TASK INIT -> CONNECTION FAILED !!!" << std::endl;
@@ -328,7 +335,7 @@ void Camera::stop()
 }
 
 //---------------------------
-//- Camera::stop()
+//- Camera::take_background_frame()
 //---------------------------
 void Camera::take_background_frame()
 {
@@ -627,6 +634,127 @@ void Camera::getFrameRate(double& frame_rate)
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
+void Camera::checkRoi(const Roi& set_roi, Roi& hw_roi)
+{
+    DEB_MEMBER_FUNCT();
+    DEB_PARAM() << DEB_VAR1(set_roi);
+    hw_roi = set_roi;
+
+    DEB_RETURN() << DEB_VAR1(hw_roi);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Camera::setRoi(const Roi& set_roi)
+{
+    DEB_MEMBER_FUNCT();
+    DEB_PARAM() << DEB_VAR1(set_roi);
+    Roi r;    
+		try
+		{
+			//- backup old roi, in order to rollback if error
+			getRoi(r);
+			if(r == set_roi) return;
+
+			//- first reset the ROI
+			Size size;
+			this->getImageSize(size);
+
+			Roi fullFrame( 0,
+				0,
+				static_cast<int>(size.getWidth()),
+				static_cast<int>(size.getHeight())
+				);
+
+			if(set_roi.isActive() && fullFrame != set_roi)
+			{
+				//- then fix the new ROI
+				//Camera_->Width.SetValue( set_roi.getSize().getWidth());
+				//Camera_->Height.SetValue(set_roi.getSize().getHeight());
+				//Camera_->OffsetX.SetValue(set_roi.getTopLeft().x);
+				//Camera_->OffsetY.SetValue(set_roi.getTopLeft().y);
+			}
+		}
+		catch(...)
+		{
+			DEB_ERROR() << "Marccd::Camera::setRoi -> generic exception caught !";
+			throw LIMA_HW_EXC(Error, "Marccd::Camera::setRoi -> generic exception caught !");
+		}
+		//catch (GenICam::GenericException &e)
+		//{
+		//	try
+		//	{
+		//		//-  rollback the old roi
+		//		Camera_->Width.SetValue( r.getSize().getWidth());
+		//		Camera_->Height.SetValue(r.getSize().getHeight());
+		//		Camera_->OffsetX.SetValue(r.getTopLeft().x);
+		//		Camera_->OffsetY.SetValue(r.getTopLeft().y);
+		//		// Error handling
+		//	}
+		//	catch (GenICam::GenericException &e2)
+		//	{
+		//		DEB_ERROR() << e2.GetDescription();
+		//		throw LIMA_HW_EXC(Error,e2.GetDescription());
+		//	}
+		//	DEB_ERROR() << e.GetDescription();
+		//	throw LIMA_HW_EXC(Error, e.GetDescription());
+		//}        
+
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Camera::getRoi(Roi& hw_roi)
+{
+    DEB_MEMBER_FUNCT();
+		try
+		{
+			Size size;
+			//- get image size to set ROI max
+			this->getImageSize(size);
+			Roi  r( static_cast<int>(0),
+							static_cast<int>(0),
+							static_cast<int>(size.getWidth()),
+							static_cast<int>(size.getHeight())
+						);
+
+			hw_roi = r;
+		}
+		catch (...)
+		{
+			// Error handling
+			DEB_ERROR() << "Marccd::Camera::getRoi -> generic exception caught !";
+			throw LIMA_HW_EXC(Error, "Marccd::Camera::getRoi -> generic exception caught !");
+		}    
+    DEB_RETURN() << DEB_VAR1(hw_roi);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Camera::checkBin(Bin& bin)
+{
+	int binX = bin.getX();
+	int binY = bin.getY();
+
+	if ( binX > 8 )
+		binX = 8;
+	else if ( binX < 1 )
+		binX = 1;
+	else if ( binY > 8 )
+		binY = 8;
+	else if ( binY < 1 )
+		binY = 1;
+
+	bin = Bin(binX, binY);
+  //DEB_RETURN() << DEB_VAR1(bin);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
 void Camera::setBinning(const Bin &bin)
 {
 	std::string cmd_to_send("set_bin,");
@@ -641,11 +769,11 @@ void Camera::setBinning(const Bin &bin)
 		if ( bin.getY() == bin.getX() )
 		{
 			bin_values << "set_bin," << bin.getY() << "," << bin.getX() << std::ends;
-			std::cout << "Camera::setBinning -> sending : *" << bin_values.str() << "*" << std::endl;
+			std::cout << "\n\t\tCamera::setBinning -> sending : *" << bin_values.str() << "*" << std::endl;
 			yat::MutexLock scoped_lock(this->_lock);
 			//- set the new binning values
 			this->write_read(bin_values.str());
-			std::cout << "Camera::setBinning -> DONE" << std::endl;
+			std::cout << "\n\t\tCamera::setBinning -> DONE" << std::endl;
 		}
 	}
 	catch (...)
@@ -662,6 +790,7 @@ void Camera::setBinning(const Bin &bin)
 void Camera::getBinning(Bin& bin)
 {
 	DEB_MEMBER_FUNCT();
+			std::cout << "\n\t\tMarccdCamera::getBinning DONE -> ENTERING ..." << std::endl;
 
 	if( !this->_sock )
 		throw LIMA_HW_EXC(Error, "No communication opened with Marccd.");
@@ -680,7 +809,7 @@ void Camera::getBinning(Bin& bin)
 		if( binX == binY )
 		{
 			bin = Bin(binX, binY);
-			std::cout << "MarccdCamera::getBinning DONE -> binX = " << binX << " binY = " << binY << std::endl;
+			std::cout << "\n\t\tMarccdCamera::getBinning DONE -> binX = " << binX << " binY = " << binY << std::endl;
 		}
 	}
 	catch (...)

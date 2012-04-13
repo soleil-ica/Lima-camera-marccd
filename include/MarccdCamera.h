@@ -85,8 +85,13 @@ namespace lima
       
 			void getFrameRate(double& frame_rate);
 
+			void checkRoi(const Roi& set_roi, Roi& hw_roi);
+			void setRoi(const Roi& set_roi);
+			void getRoi(Roi& hw_roi);    
+
 			void setBinning(const Bin&);
 			void getBinning(Bin&);
+			void checkBin(Bin& );
       
 			inline bool is_stop_sequence_finished() {
 				return this->_stop_sequence_finished;

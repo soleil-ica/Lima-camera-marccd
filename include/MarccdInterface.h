@@ -5,8 +5,6 @@
 #include "MarccdCamera.h"
 #include "MarccdReader.h"
 
-
-
 namespace lima
 {
 namespace Marccd
@@ -137,6 +135,27 @@ class SyncCtrlObj : public HwSyncCtrlObj
 };
 
 /*******************************************************************
+ * \class RoiCtrlObj
+ * \brief Control object providing Basler Roi interface
+ *******************************************************************/
+
+class RoiCtrlObj : public HwRoiCtrlObj
+{
+    DEB_CLASS_NAMESPC(DebModCamera, "RoiCtrlObj", "MarCCD");
+
+ public:
+    RoiCtrlObj(Camera& cam);
+    virtual ~RoiCtrlObj();
+
+    virtual void setRoi(const Roi& set_roi);
+    virtual void getRoi(Roi& hw_roi);
+    virtual void checkRoi(const Roi& set_roi, Roi& hw_roi);
+
+ private:
+    Camera& m_cam;
+};
+
+/*******************************************************************
  * \class BinCtrlObj
  * \brief Control object providing MarCCD Bin interface
  *******************************************************************/
@@ -149,7 +168,7 @@ class BinCtrlObj : public HwBinCtrlObj
   virtual void setBin(const Bin& bin);
   virtual void getBin(Bin& bin);
   //allow all binning
-  virtual void checkBin(Bin& ) {}
+  virtual void checkBin(Bin& bin);
  private:
   Camera& m_cam;
 };
@@ -200,6 +219,7 @@ class Interface : public HwInterface
 	DetInfoCtrlObj	m_det_info;
 	BufferCtrlObj		m_buffer;
 	SyncCtrlObj			m_sync;
+	RoiCtrlObj      m_roi;
 	BinCtrlObj      m_bin;
 
 };
