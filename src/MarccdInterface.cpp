@@ -5,6 +5,11 @@ using namespace lima;
 using namespace lima::Marccd;
 using namespace std;
 
+#define MINBINX 2
+#define MAXBINX 8
+#define MINBINY 2
+#define MAXBINY 8
+
 /*******************************************************************
  * \brief DetInfoCtrlObj constructor
  *******************************************************************/
@@ -334,6 +339,12 @@ void BufferCtrlObj::disableReader(void)
 std::cout << "\t\tBufferCtrlObj::disableReader(void) -> DONE" << std::endl;
 }
 
+int* BufferCtrlObj::getHeader()
+{
+  DEB_MEMBER_FUNCT();
+  return m_reader->getHeader();
+}
+
 /*******************************************************************
  * \brief SyncCtrlObj constructor
  *******************************************************************/
@@ -417,6 +428,22 @@ void SyncCtrlObj::setLatTime(double lat_time)
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
 	m_cam.getLatTime(lat_time);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void SyncCtrlObj::setNbFrames(int nb_frames)
+{
+	m_cam.setNbFrames(nb_frames);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void SyncCtrlObj::getNbFrames(int& nb_frames)
+{
+	m_cam.getNbFrames(nb_frames);
 }
 
 //-----------------------------------------------------
@@ -510,7 +537,15 @@ BinCtrlObj::BinCtrlObj(Camera &cam)
  *******************************************************************/
 void BinCtrlObj::setBin(const Bin& aBin)
 {
-  m_cam.setBinning(aBin);
+  Bin myBin = aBin;
+//   std::cout   << "BinCtrlObj::setBin " 
+// 	      << aBin.getX() << "x"
+// 	      << aBin.getY() << std::endl;  
+  checkBin(myBin);
+//   std::cout   << "---> After check:  " 
+// 	      << myBin.getX() << "x"
+// 	      << myBin.getY() << std::endl;  
+  m_cam.setBinning(myBin);
 }
 
 /*******************************************************************
@@ -522,11 +557,15 @@ void BinCtrlObj::getBin(Bin &aBin)
 }
 
 /*******************************************************************
- * \brief getBin : returns binning value
+ * \brief checkBin : returns a validated binning value
  *******************************************************************/
-void BinCtrlObj::checkBin(Bin &aBin)
+void BinCtrlObj::checkBin(Bin& bin)
 {
-  m_cam.checkBin(aBin);
+  int bin_x = min(bin.getX(), int(MAXBINX));
+  bin_x = max(bin_x, int(MINBINX));
+  int bin_y = min(bin.getY(), int(MAXBINY));
+  bin_y = max(bin_y, int(MINBINY));
+  bin = Bin(bin_x, bin_y);
 }
 
 /*******************************************************************
@@ -537,6 +576,11 @@ Interface::Interface(Camera& cam)
 	: m_cam(cam),m_det_info(cam), m_buffer(cam),m_sync(cam),m_roi(cam), m_bin(cam)
 {
 	DEB_CONSTRUCTOR();
+
+  //std::cout   << "Interface::Interface - ENTERING" << std::endl;
+  
+  //run the cammera
+  m_cam.go(2000);
 
 	HwDetInfoCtrlObj *det_info = &m_det_info;
 	m_cap_list.push_back(HwCap(det_info));
@@ -552,6 +596,11 @@ Interface::Interface(Camera& cam)
 
 	HwBinCtrlObj *bin = &m_bin;
 	m_cap_list.push_back(HwCap(bin));
+  
+  m_cam.stop();
+  m_buffer.reset();
+
+  //std::cout   << "Interface::Interface() - DONE" << std::endl;
 }
 
 //-----------------------------------------------------
@@ -579,8 +628,9 @@ void Interface::reset(ResetLevel reset_level)
 	DEB_MEMBER_FUNCT();
 	DEB_PARAM() << DEB_VAR1(reset_level);
 
-	stopAcq();
+  //stopAcq();
 
+  /*
 	Size image_size;
 	m_det_info.getMaxImageSize(image_size);
 	ImageType image_type;
@@ -590,6 +640,7 @@ void Interface::reset(ResetLevel reset_level)
 
 	m_buffer.setNbConcatFrames(1);
 	m_buffer.setNbBuffers(1);
+  */
 }
 
 //-----------------------------------------------------
@@ -609,6 +660,7 @@ void Interface::startAcq()
 {
 	DEB_MEMBER_FUNCT();
 	m_cam.start();
+  m_buffer.update_image_from_file(); 
 }
 
 //-----------------------------------------------------
@@ -618,7 +670,8 @@ void Interface::stopAcq()
 {
 	DEB_MEMBER_FUNCT();
 	m_cam.stop();
-  m_buffer.update_image_from_file();    
+  m_buffer.reset();
+  //m_buffer.update_image_from_file();    
 }
 
 //-----------------------------------------------------
@@ -633,6 +686,15 @@ void Interface::takeBackgroundFrame()
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
+void Interface::saveBG()
+{
+  DEB_MEMBER_FUNCT();
+  m_cam.saveBG(true);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
 void Interface::getStatus(StatusType& status)
 {
 	Camera::Status marccd_status = Camera::Unknown;
@@ -640,11 +702,19 @@ void Interface::getStatus(StatusType& status)
 
 ////std::cout << "\t***** Interface::getStatus -> MARCCD status = " << marccd_status << std::endl;
 
+  int nb_frames;
+  m_cam.getNbFrames(nb_frames);
+
 	if( this->m_buffer.isRunning() )
 	{
 		status.acq = AcqRunning;
 		status.det = DetExposure;
 	}
+  else if (m_buffer.isTimeoutSignaled())
+    {
+      status.acq = AcqFault;
+      status.det = DetFault;
+    }
 	else
 	{
 		m_cam.getStatus(marccd_status);
@@ -670,6 +740,11 @@ void Interface::getStatus(StatusType& status)
 			status.det = DetLatency;
 			break;
 
+	case Camera::Config:
+	  status.acq = AcqConfig;
+	  status.det = DetFault;
+	  break;
+
 		case Camera::Unknown:
 		case Camera::Fault:
 			status.acq = AcqFault;
@@ -679,6 +754,16 @@ void Interface::getStatus(StatusType& status)
 	}
 	status.det_mask = DetExposure | DetReadout | DetLatency | DetFault;
 /////std::cout << "\t***** Interface::getStatus -> StatusType = " << status.acq << std::endl;
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+int Interface::getNbAcquiredFrames()
+{
+  DEB_MEMBER_FUNCT();
+	int acq_frames = m_buffer.getLastAcquiredFrame();
+	return acq_frames;
 }
 
 //-----------------------------------------------------
@@ -752,6 +837,96 @@ int Interface::getImageIndex()
 {
 	DEB_MEMBER_FUNCT();
 	return m_cam.getImageIndex();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+unsigned int Interface::getCamState()
+{
+  DEB_MEMBER_FUNCT();
+  return m_cam.getState();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setBeamX(float X)
+{
+  DEB_MEMBER_FUNCT();
+  m_cam.setBeamX(X);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setBeamY(float Y)
+{
+  DEB_MEMBER_FUNCT();
+  m_cam.setBeamY(Y);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setDistance(float D)
+{
+  DEB_MEMBER_FUNCT();
+  m_cam.setDistance(D);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Interface::setWavelength(float W)
+{
+  DEB_MEMBER_FUNCT();
+  m_cam.setWavelength(W);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+float Interface::getBeamX()
+{
+  DEB_MEMBER_FUNCT();
+  return m_cam.getBeamX();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+float Interface::getBeamY()
+{
+  DEB_MEMBER_FUNCT();
+  return m_cam.getBeamY();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+float Interface::getDistance()
+{
+  DEB_MEMBER_FUNCT();
+  return m_cam.getDistance();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+float Interface::getWavelength()
+{
+  DEB_MEMBER_FUNCT();
+  return m_cam.getWavelength();
+}
+
+//-----------------------------------------------------
+// get last buffer header
+//-----------------------------------------------------
+int* Interface::getHeader(void)
+{
+  DEB_MEMBER_FUNCT();
+  return m_buffer.getHeader();
 }
 
 //-----------------------------------------------------

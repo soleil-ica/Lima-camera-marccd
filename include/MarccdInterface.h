@@ -9,6 +9,7 @@ namespace lima
 {
 namespace Marccd
 {
+
 class Interface;
 
 //*******************************************************************
@@ -29,7 +30,6 @@ class DetInfoCtrlObj : public HwDetInfoCtrlObj
 	virtual void getDefImageType(ImageType& def_image_type);
 	virtual void getCurrImageType(ImageType& curr_image_type);
 	virtual void setCurrImageType(ImageType  curr_image_type);
-
 	virtual void getPixelSize(double& x_size,double &y_size);
 	virtual void getDetectorType(std::string& det_type);
 	virtual void getDetectorModel(std::string& det_model);
@@ -94,6 +94,7 @@ class BufferCtrlObj : public HwBufferCtrlObj
 	void setTimeout(int TO);
 	void enableReader(void);
 	void disableReader(void);
+      int* getHeader(void);
 
  private:
 	 SoftBufferAllocMgr      m_buffer_alloc_mgr;
@@ -124,6 +125,9 @@ class SyncCtrlObj : public HwSyncCtrlObj
 
     virtual void setLatTime(double  lat_time);//- Not supported by Marccd
     virtual void getLatTime(double& lat_time);//- Not supported by Marccd
+
+      virtual void setNbFrames(int  nb_frames);
+      virtual void getNbFrames(int& nb_frames);
 
     virtual void setNbHwFrames(int  nb_frames);
     virtual void getNbHwFrames(int& nb_frames);
@@ -168,7 +172,7 @@ class BinCtrlObj : public HwBinCtrlObj
   virtual void setBin(const Bin& bin);
   virtual void getBin(Bin& bin);
   //allow all binning
-  virtual void checkBin(Bin& bin);
+      virtual void checkBin(Bin& bin); //{}
  private:
   Camera& m_cam;
 };
@@ -179,7 +183,7 @@ class BinCtrlObj : public HwBinCtrlObj
 //*******************************************************************/
 class Interface : public HwInterface
 {
-	DEB_CLASS_NAMESPC(DebModCamera, "MarccdInterface", "Marccd");
+      DEB_CLASS_NAMESPC(DebModCamera, "Interface", "Marccd");
 
  public:
 	Interface(Camera& cam);
@@ -191,10 +195,13 @@ class Interface : public HwInterface
 	virtual void 	prepareAcq();
 	virtual void 	startAcq();
 	virtual void 	stopAcq();
-	virtual void  takeBackgroundFrame();
 	virtual void 	getStatus(StatusType& status);
+      virtual int getNbAcquiredFrames();
 	virtual int 	getNbHwAcquiredFrames();
-	virtual void	getFrameRate(double& frame_rate);
+
+      void takeBackgroundFrame();
+      void saveBG();
+      void getFrameRate(double& frame_rate);
 	
 	void setImageIndex(int imgIdx);
 	int	 getImageIndex(void);		
@@ -204,6 +211,19 @@ class Interface : public HwInterface
 	
 	void setImagePath(const string& path);
 	const string& 	getImagePath(void);
+	
+      unsigned int getCamState(void);
+
+      void setBeamX(float);
+      void setBeamY(float);
+      void setDistance(float);
+      void setWavelength(float);
+      float getBeamX();
+      float getBeamY();
+      float getDistance();
+      float getWavelength();
+
+      int* getHeader(void);
 	
 	//- Reader task timeout to process image from file
 	void setTimeout(int TO);
