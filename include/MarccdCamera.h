@@ -2,11 +2,12 @@
 #define _MARCCD_INTERFACE_H
 
 ///////////////////////////////////////////////////////////
-// YAT::TASK 
+// YAT::TASK
 ///////////////////////////////////////////////////////////
 #include <yat/threading/Task.h>
 #include <yat/network/ClientSocket.h>
-//#include <yat/network/Address.h>
+#include <yat/time/Time.h>
+#include <Timer.h>
 
 #define kLO_WATER_MARK      128
 #define kHI_WATER_MARK      512
@@ -18,215 +19,272 @@
 #include <stdlib.h>
 #include <limits>
 
-#include "HwMaxImageSizeCallback.h"
 #include "HwBufferMgr.h"
 
 namespace lima
 {
 
-	namespace Marccd
-	{
+    namespace Marccd
+    {
 
-		//--------------------------------------------------------------------
-		// \class Camera
-		// \brief object controlling the marccd detector through a socket
-		//--------------------------------------------------------------------
-		class Camera : public yat::Task
-		{
-			DEB_CLASS_NAMESPC(DebModCamera, "Camera", "MarCCD");
+        //--------------------------------------------------------------------
+        // \class ExposureCb
+        // \brief object controlling the exposure duration
+        //--------------------------------------------------------------------        
 
-		public:
+        class ExposureCb : public Timer::Callback
+        {
+            DEB_CLASS_NAMESPC(DebModCamera, "Camera", "MarCCD");
+        public:
 
-	enum Status 
-	{
-				Ready, 
-				Exposure,
-				Readout,
-				Latency,
-	  Config,
-				Fault,
-				Unknown
-			};
+            void start()
+            {
+                DEB_MEMBER_FUNCT();                
+                DEB_TRACE() << "ExposureCb::start";
+                m_is_falling_occured = false;
+                m_start = yat::CurrentTime().raw_value();
+            }
 
-			Camera(const std::string& camera_ip, 
-						 size_t port_number, 
-						 const std::string& img_path);
+            void risingEdge()
+            {               
+               m_is_falling_occured = false;                
+            }
 
-	//Camera();
-	Camera(const Camera&);
-	~Camera();
-	Camera& operator=(const Camera&);
+            void fallingEdge()
+            {
+                DEB_MEMBER_FUNCT();
+                DEB_TRACE() << "ExposureCb::fallingEdge";
+                m_is_falling_occured = true;
+                m_end = yat::CurrentTime().raw_value();
+                unsigned long millis = (m_end - m_start) / 1000;
+                DEB_TRACE() << "Elapsed time  = " << millis << " (ms)\n";
+            }
 
-			void start();
-			void stop();
-			void take_background_frame();
+            void end()
+            {
+            }
+            
+            bool isFallingOccured(){return m_is_falling_occured;}
+        private:
+            yat::int64 m_start;
+            yat::int64 m_end;
+            bool m_is_falling_occured;        
 
-			void prepare(); //- USEFULL ?
+        };
 
-			// -- detector info
-			void getImageSize(Size& size);
-	//void setPixelDepth(ImageType pixel_depth);
-	//void getPixelDepth(ImageType& pixel_depth);
-			void getPixelSize(double& x_size,double &y_size);
-			void getImageType(ImageType& type);
+        //--------------------------------------------------------------------
+        // \class LatencyCb
+        // \brief object controlling the latency duration
+        //--------------------------------------------------------------------
 
-			void getDetectorType(std::string& type);
-			void getDetectorModel(std::string& model);
+        class LatencyCb : public Timer::Callback
+        {
+            DEB_CLASS_NAMESPC(DebModCamera, "Camera", "MarCCD");
+        public:
 
-			//- Sync 
-			void setTrigMode(TrigMode  mode);
-			void getTrigMode(TrigMode& mode);
+            void start()
+            {
+                DEB_MEMBER_FUNCT();                
+                DEB_TRACE() << "LatencyCb::start";          
+                m_is_falling_occured = false;                        
+                m_start = yat::CurrentTime().raw_value();
+            }
 
-			void setExpTime(double  exp_time);
-			void getExpTime(double& exp_time);
+            void risingEdge()
+            {
+               m_is_falling_occured = false;                
+            }
 
-			void setLatTime(double  lat_time);
-			void getLatTime(double& lat_time);
+            void fallingEdge()
+            {
+                DEB_MEMBER_FUNCT();
+                DEB_TRACE() << "LatencyCb::fallingEdge";
+                m_is_falling_occured = true;               
+                m_end = yat::CurrentTime().raw_value();
+                unsigned long millis = (m_end - m_start) / 1000;
+                DEB_TRACE() << "Elapsed time  = " << millis << " (ms)\n";
+            }
 
-			void setNbFrames(int  nb_frames);
-			void getNbFrames(int& nb_frames);
+            void end()
+            {         
+            }
+            
+            bool isFallingOccured(){return m_is_falling_occured;}           
+        private:
+            yat::int64 m_start;
+            yat::int64 m_end;
+            bool m_is_falling_occured;            
+        };
 
-			void getStatus(Camera::Status& status);
-	unsigned int getState();
-			void getFrameRate(double& frame_rate);
 
-			void checkRoi(const Roi& set_roi, Roi& hw_roi);
-			void setRoi(const Roi& set_roi);
-			void getRoi(Roi& hw_roi);    
+        //--------------------------------------------------------------------
+        // \class Camera
+        // \brief object controlling the marccd detector through a socket
+        //--------------------------------------------------------------------
 
-			void setBinning(const Bin&);
-			void getBinning(Bin&);
-			void checkBin(Bin& );
-      
-	bool is_stop_sequence_finished();
+        class Camera : public yat::Task
+        {
+            DEB_CLASS_NAMESPC(DebModCamera, "Camera", "MarCCD");
 
-			void  setImagePath(const std::string& path);
-			const std::string&  getImagePath(void);
+        public:
 
-	//const std::string& getDirectoryWatcherPath();
+            enum Status
+            {
+                Ready,
+                Exposure,
+                Readout,
+                Latency,
+                Config,
+                Fault,
+                Unknown
+            };
 
-			void setImageFileName(const std::string& imgName);
-			const std::string& getImageFileName();
+            Camera(const std::string& camera_ip,
+                   size_t port_number,
+                   const std::string& img_path);
 
-      const std::string& getFullImgName();
+            ~Camera();
 
-	void setImageIndex(int newImgIdx);
-	int getImageIndex() ;
-	int getFirstImage() ;
-	void saveBG(bool);
+            void start();
+            void stop();
+            void take_background_frame();
 
-        void setBeamX(float);
-        void setBeamY(float);
-        void setDistance(float);
-        void setWavelength(float);
-	float getBeamX();
-	float getBeamY();
-	float getDistance();
-	float getWavelength();
+            // -- detector info
+            void getImageSize(Size& size);
+            void getPixelSize(double& x_size, double &y_size);
+            void getImageType(ImageType& type);
 
-		protected:
-			virtual void setMaxImageSizeCallbackActive(bool cb_active);	
+            void getDetectorType(std::string& type);
+            void getDetectorModel(std::string& model);
 
-			//- yat::Task implementation
-			virtual void handle_message( yat::Message& msg )      throw (yat::Exception);
-		private:
-			//void GetImage();
-			//void FreeImage();
+            //- Sync
+            void setTrigMode(TrigMode mode);
+            void getTrigMode(TrigMode& mode);
 
-			/**
-			* Disconnect from the current socket
-			*/
-			void disconnect();
-			/**
-			* Connect to the current socket
-			*/
-			void connect();
-			/**
-			* Get detector response
-			*/
-			std::string read();
-			/**
-			* Send command to detector
-			*/
-			void write(std::string);
-			/**
-			* Send command and receive the response
-			*/
-			std::string write_read(std::string);
-			/**
-			* update marccd state
-			*/
-			void get_marccd_state();
-#if 0
-			/**
-			* Method to start an Marccd acquisition
-			*/
-			void perform_start_sequence();
-			/**
-			* Method to stop an Marccd acquisition
-			*/
-			void perform_stop_sequence();
-#endif
-	/**
-	 * Method to perform an Marccd acquisition
-	 */
-	void perform_acquisition_sequence();
-	/**
-	 * Method to abort an Marccd acquisition
-	 */
-	void perform_abort_sequence();
-			/**
-			* Sequence to take a background frame
-			*/
-			void perform_background_frame();
+            void setExpTime(double exp_time);
+            void getExpTime(double& exp_time);
 
-			int convertStringToInt( char* hexa_text );
-			      
-			//- mutex to protect file against read image from device and
-			//-		marccd acquisition
-			yat::Mutex 	        _lock;
-			yat::ClientSocket*  _sock;
-			
-			std::string         _image_path;
-			std::string         _image_name;
-	std::string         _full_img_name;
+            void setLatTime(double lat_time);
+            void getLatTime(double& lat_time);
 
-			//- img stuff
-			int 	m_nb_frames;	
-			Size	m_image_size;
-      
-			unsigned short	    m_trigger_type;
-	double         m_exp_time;
-	double         m_lat_time;
-	int            m_binning;
-	
-			size_t _marccd_state;
-			Camera::Status		  m_status;
-			int							    _image_number;
-	int            _first_image;
+            void setNbFrames(int nb_frames);
+            void getNbFrames(int& nb_frames);
 
-			//- Marccd stuff 
-			std::string		      _camera_ip;
-			size_t				      _port_num;
-			std::string 	      _detector_model;
-			std::string 	      _detector_type;
+            void getStatus(Camera::Status& status);
+            unsigned int getState();
 
-	// X-ray source header info
-	float sourceBeamX;
-	float sourceBeamY;
-	float sourceDistance;
-	float sourceWavelength;
+            void checkRoi(const Roi& set_roi, Roi& hw_roi);
+            void setRoi(const Roi& set_roi);
+            void getRoi(Roi& hw_roi);
 
-	//bool _stop_already_done;
-			std::string					_error;
-	bool _stop_sequence_finished;
-	bool _abort;
+            void setBinning(const Bin&);
+            void getBinning(Bin&);
+            void checkBin(Bin&);
 
-	bool _bgAcquired;
-	bool _saveBG;
-		};
-	} //- namespace Marccd
+            //specific stuff 
+            void getDetectorImageSize(Size& size);
+            void setImagePath(const std::string& path);
+            const std::string& getImagePath(void);
+            void setImageFileName(const std::string& imgName);
+            const std::string& getImageFileName();
+            void setImageIndex(int newImgIdx);
+            int getImageIndex();
+            int getFirstImage();
+
+            bool isStopSequenceFinished();
+            void saveBGFrame(bool);
+
+            void setBeamX(float);
+            float getBeamX();
+            void setBeamY(float);
+            float getBeamY();
+            void setDistance(float);
+            float getDistance();
+
+            void setWavelength(float);
+            float getWavelength();
+
+        protected:
+
+            //- yat::Task implementation
+            virtual void handle_message(yat::Message& msg) throw (yat::Exception);
+        private:
+
+            /// Get detector response
+            std::string read();
+
+            /// Send command to detector
+            void write(std::string);
+
+            /// Send command and receive the response
+            std::string send_cmd_and_receive_answer(std::string);
+
+            /// get detector state
+            void get_marccd_state();
+
+            /// Start acquisition sequence
+            void perform_acquisition_sequence();
+
+            /// Abort acquisition
+            void performm_abort_sequence();
+
+            /// start a background frame acqusistion
+            void perform_background_frame();
+
+            ///convert the detector status string to an int.
+            int convert_string_to_int(char* hexa_text);
+
+
+            //- socket object used to communicate with detector
+            yat::ClientSocket m_sock;
+
+            //- mutex to protect file against read image from device and detector
+            yat::Mutex m_lock;
+
+            //- image/file stuff
+            int m_nb_frames;
+            Size m_detector_size;
+            std::string m_image_path;
+            std::string m_image_name;
+
+            //- acquisition control stuff
+            double m_exp_time;
+            double m_lat_time;
+            unsigned m_binning_x;
+            unsigned m_binning_y;
+
+            size_t m_marccd_state;
+            Camera::Status m_status;
+            int m_image_number;
+            int m_first_image;
+
+            //- Marccd stuff
+            std::string m_camera_ip;
+            size_t m_port_num;
+            std::string m_detector_model;
+            std::string m_detector_type;
+
+            // X-ray source header info
+            float m_source_beamX;
+            float m_source_beamY;
+            float m_source_distance;
+            float m_source_wavelength;
+
+            bool m_is_stop_sequence_finished;
+            bool m_is_abort_in_progress;
+            bool m_is_bg_acquisition_finished;
+            bool m_is_bg_saving_requested;
+
+            std::string m_error;
+
+            // Timers controlling exposure/latency durations
+            ExposureCb m_exposure_cb;
+            LatencyCb m_latency_cb;
+            Timer m_exposure_timer;
+            Timer m_latency_timer;
+        };
+
+    } //- namespace Marccd
 } // namespace lima
-
 
 #endif // _MARCCD_INTERFACE_H
