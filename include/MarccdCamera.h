@@ -39,15 +39,15 @@ namespace lima
 
             void start()
             {
-                DEB_MEMBER_FUNCT();                
+                DEB_MEMBER_FUNCT();
                 DEB_TRACE() << "ExposureCb::start";
                 m_is_falling_occured = false;
                 m_start = yat::CurrentTime().raw_value();
             }
 
             void risingEdge()
-            {               
-               m_is_falling_occured = false;                
+            {
+                m_is_falling_occured = false;
             }
 
             void fallingEdge()
@@ -63,12 +63,15 @@ namespace lima
             void end()
             {
             }
-            
-            bool isFallingOccured(){return m_is_falling_occured;}
+
+            bool isFallingOccured()
+            {
+                return m_is_falling_occured;
+            }
         private:
             yat::int64 m_start;
             yat::int64 m_end;
-            bool m_is_falling_occured;        
+            bool m_is_falling_occured;
 
         };
 
@@ -84,36 +87,39 @@ namespace lima
 
             void start()
             {
-                DEB_MEMBER_FUNCT();                
-                DEB_TRACE() << "LatencyCb::start";          
-                m_is_falling_occured = false;                        
+                DEB_MEMBER_FUNCT();
+                DEB_TRACE() << "LatencyCb::start";
+                m_is_falling_occured = false;
                 m_start = yat::CurrentTime().raw_value();
             }
 
             void risingEdge()
             {
-               m_is_falling_occured = false;                
+                m_is_falling_occured = false;
             }
 
             void fallingEdge()
             {
                 DEB_MEMBER_FUNCT();
                 DEB_TRACE() << "LatencyCb::fallingEdge";
-                m_is_falling_occured = true;               
+                m_is_falling_occured = true;
                 m_end = yat::CurrentTime().raw_value();
                 unsigned long millis = (m_end - m_start) / 1000;
                 DEB_TRACE() << "Elapsed time  = " << millis << " (ms)\n";
             }
 
             void end()
-            {         
+            {
             }
-            
-            bool isFallingOccured(){return m_is_falling_occured;}           
+
+            bool isFallingOccured()
+            {
+                return m_is_falling_occured;
+            }
         private:
             yat::int64 m_start;
             yat::int64 m_end;
-            bool m_is_falling_occured;            
+            bool m_is_falling_occured;
         };
 
 
@@ -147,7 +153,7 @@ namespace lima
 
             void start();
             void stop();
-            void take_background_frame();
+            void takeBackgroundFrame();
 
             // -- detector info
             void getImageSize(Size& size);
@@ -211,35 +217,39 @@ namespace lima
         private:
 
             /// Get detector response
-            std::string read();
+            std::string _read();
 
             /// Send command to detector
-            void write(std::string);
+            void _write(std::string);
 
             /// Send command and receive the response
-            std::string send_cmd_and_receive_answer(std::string);
+            std::string _sendCmdAndReceiveAnswer(std::string);
 
             /// get detector state
-            void get_marccd_state();
+            void _updateMarccdState();
 
             /// Start acquisition sequence
-            void perform_acquisition_sequence();
-
-            /// Abort acquisition
-            void performm_abort_sequence();
+            void _performAcquisitionSequence();
 
             /// start a background frame acqusistion
-            void perform_background_frame();
+            void _performBackgroundFrame();
+
+            /// Stop acquisition
+            void _performStopSequence();
+
+            ///readout a frame (1 or 2)
+            void _readoutFrame(unsigned bufferNumber);
 
             ///convert the detector status string to an int.
-            int convert_string_to_int(char* hexa_text);
-
+            int _convertStringToInt(char* hexa_text);
 
             //- socket object used to communicate with detector
             yat::ClientSocket m_sock;
 
-            //- mutex to protect file against read image from device and detector
+            //- mutex's to protect some variables from acces read/write from device & task 
             yat::Mutex m_lock;
+            yat::Mutex m_lock_flag;
+            yat::Mutex m_lock_status;
 
             //- image/file stuff
             int m_nb_frames;
@@ -270,9 +280,8 @@ namespace lima
             float m_source_distance;
             float m_source_wavelength;
 
-            bool m_is_stop_sequence_finished;
-            bool m_is_abort_in_progress;
-            bool m_is_bg_acquisition_finished;
+            bool m_is_stop_in_progress;
+            bool m_is_bg_acquisition_in_progress;
             bool m_is_bg_saving_requested;
 
             std::string m_error;

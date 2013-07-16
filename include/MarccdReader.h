@@ -82,7 +82,7 @@ namespace lima
             UINT32 bias_applied; /* flags correction has been applied - hold magic number ? */
             UINT32 flatfield_applied; /* flags correction has been applied - hold magic number ? */
             UINT32 distortion_applied; /* flags correction has been applied - hold magic number ? */
-            UINT32 original_header_type; /* Header/frame type from file that frame is read from */
+            UINT32 original_header_type; /* Header/frame type from file that frame is _read from */
 
 
             char reserve1[(64 - 39) * sizeof (INT32) - 16];
@@ -221,11 +221,11 @@ namespace lima
             void reset();
             //- return curent image index
             int getLastAcquiredFrame();
-            //- return true if reader can not read image file during the max allowed time
+            //- return true if reader can not _read image file during the max allowed time
             bool isTimeoutSignaled();
             //- return true if reader is processing image file
             bool isRunning();
-            //- define max allowed time to read image file
+            //- define max allowed time to _read image file
             void setTimeout(double);
             //- get last image header
             int* getHeader();
@@ -234,7 +234,7 @@ namespace lima
         protected:
             virtual void handle_message(yat::Message& msg) throw (yat::Exception);
 
-            //- read Marccd image from a file and update device image attribute
+            //- _read Marccd image from a file and update device image attribute
             bool getImageFromFile(const std::string& fileName);
 
         private:
@@ -246,7 +246,7 @@ namespace lima
 
             //- Loading image stuff!
             int m_image_number;
-            std::string m_current_image_file_name; //- new image to read
+            std::string m_current_image_file_name; //- new image to _read
 
             //- Timeout management (while processing image file)
             yat::Timeout m_timeout;

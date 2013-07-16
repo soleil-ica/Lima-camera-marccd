@@ -300,7 +300,7 @@ void BufferCtrlObj::unregisterFrameCallback(HwFrameCallback& frame_cb)
 void BufferCtrlObj::start()
 {
     DEB_MEMBER_FUNCT();
-    //- start thread which will read the new image from file
+    //- start thread which will _read the new image from file
     m_reader->start();
 }
 
@@ -688,8 +688,9 @@ void Interface::stopAcq()
 {
     DEB_MEMBER_FUNCT();
     m_cam.stop();
-    m_buffer.reset();
+    //m_buffer.reset();
 }
+
 
 //-----------------------------------------------------
 //
@@ -698,7 +699,7 @@ void Interface::stopAcq()
 void Interface::takeBackgroundFrame()
 {
     DEB_MEMBER_FUNCT();
-    m_cam.take_background_frame();
+    m_cam.takeBackgroundFrame();
 }
 
 //-----------------------------------------------------
@@ -855,15 +856,6 @@ int Interface::getImageIndex()
     return m_cam.getImageIndex();
 }
 
-//-----------------------------------------------------
-//
-//-----------------------------------------------------
-
-unsigned int Interface::getCamState()
-{
-    DEB_MEMBER_FUNCT();
-    return m_cam.getState();
-}
 
 //-----------------------------------------------------
 //

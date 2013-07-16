@@ -229,12 +229,12 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
                     m_timeout.disable();
                     
                     //@@TODO : Check why we need this, otherwise unable to open the file !!
-                    clock_t wait = 2. /1* CLOCKS_PER_SEC + clock();
+                    clock_t wait = 5. /1* CLOCKS_PER_SEC + clock();
                     while (wait > clock());
                     //
 
-                    //- read image file
-                    bool ready = getImageFromFile(m_current_image_file_name);
+                    //- _read image file
+                    getImageFromFile(m_current_image_file_name);
 
                     int nb_frames;
                     m_cam.getNbFrames(nb_frames);

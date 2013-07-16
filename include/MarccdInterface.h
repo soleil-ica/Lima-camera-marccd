@@ -223,8 +223,6 @@ namespace lima
             void setImagePath(const string& path);
             const string& getImagePath(void);
 
-            unsigned int getCamState(void);
-
             void setBeamX(float);
             void setBeamY(float);
             void setDistance(float);
