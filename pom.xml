@@ -23,11 +23,8 @@
 		</dependency>
 		<dependency>
 			<groupId>fr.soleil.lib</groupId>
-			<artifactId>YAT4Tango-${aol}-${library}-${mode}</artifactId>
-		</dependency>     
-		<dependency>
-			<groupId>fr.soleil.lib</groupId>
 			<artifactId>YAT-${aol}-${library}-${mode}</artifactId>
+			<version>1.7.17-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
