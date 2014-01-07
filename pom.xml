@@ -12,7 +12,7 @@
     <version>1.3.0-SNAPSHOT</version>
 	
 	<packaging>nar</packaging>
-    <name>LimaMarccd</name>    <!-- use for the name of executable -->
+    <name>LimaMarccd</name>
     <description>This module controls the MarCCD SX 165 Detector</description>
 	
 	<dependencies>
@@ -24,7 +24,6 @@
 		<dependency>
 			<groupId>fr.soleil.lib</groupId>
 			<artifactId>YAT-${aol}-${library}-${mode}</artifactId>
-			<version>1.7.17-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
@@ -43,9 +42,6 @@
 				<options>
 					<option>-w</option>
 				</options>
-				<defines>
-					<define>LOG4TANGO_HAVE_INT64_T</define>
-				</defines>
             </cpp>
 			<libraries>
 				<library>
