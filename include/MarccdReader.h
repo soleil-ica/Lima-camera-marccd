@@ -227,6 +227,8 @@ namespace lima
             bool isRunning();
             //- define max allowed time to _read image file
             void setTimeout(double);
+            void setWaitFileOnDiskTime(double value);        
+            double getWaitFileOnDiskTime(void);                   
             //- get last image header
             int* getHeader();
 
@@ -250,7 +252,8 @@ namespace lima
 
             //- Timeout management (while processing image file)
             yat::Timeout m_timeout;
-            int m_timeout_value;
+            int     m_timeout_value;
+            double  m_wait_file_on_disk_time;//in ms
             MARCCD_HEADER_UNION hccd;
 
         };
