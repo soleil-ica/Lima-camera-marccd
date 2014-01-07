@@ -81,6 +81,8 @@ namespace lima
         bool isTimeoutSignaled(void);
         bool isRunning(void);
         void setTimeout(int TO);
+        void setWaitFileOnDiskTime(double value);
+        double getWaitFileOnDiskTime(void);		
         int* getHeader(void);
 
     private:

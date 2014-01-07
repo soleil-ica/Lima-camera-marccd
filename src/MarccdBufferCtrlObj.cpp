@@ -219,6 +219,27 @@ void BufferCtrlObj::setTimeout(int TO)
     m_reader->setTimeout(TO);
 }
 
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
+void BufferCtrlObj::setWaitFileOnDiskTime(double value)
+{
+    DEB_MEMBER_FUNCT();
+    m_reader->setWaitFileOnDiskTime(value);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
+double BufferCtrlObj::getWaitFileOnDiskTime(void)
+{
+    DEB_MEMBER_FUNCT();
+    return m_reader->getWaitFileOnDiskTime();
+}
+
 //-----------------------------------------------------
 //
 //-----------------------------------------------------

@@ -184,3 +184,26 @@ void Interface::setTimeout(int TO)
     m_buffer.setTimeout(TO);
 }
 
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
+void Interface::setWaitFileOnDiskTime(double value)
+{
+    DEB_MEMBER_FUNCT();
+    m_buffer.setWaitFileOnDiskTime(value);
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+double Interface::getWaitFileOnDiskTime(void)
+{
+    DEB_MEMBER_FUNCT();
+    return m_buffer.getWaitFileOnDiskTime();
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+

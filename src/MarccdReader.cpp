@@ -175,6 +175,26 @@ void Reader::setTimeout(double newTimeOutVal)
 //
 //-----------------------------------------------------
 
+void Reader::setWaitFileOnDiskTime(double value)
+{
+    DEB_MEMBER_FUNCT();
+    m_wait_file_on_disk_time = value;
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
+double Reader::getWaitFileOnDiskTime(void)
+{
+    DEB_MEMBER_FUNCT();
+    return m_wait_file_on_disk_time;
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
 int* Reader::getHeader(void)
 {
     DEB_MEMBER_FUNCT();
@@ -251,7 +271,8 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
                     m_timeout.disable();
                     
                     //@@TODO : Check why we need this, otherwise unable to open the file !!
-                    clock_t wait = 5. /1* CLOCKS_PER_SEC + clock();
+					DEB_TRACE() << "Reader: Wait ["<<m_wait_file_on_disk_time<<"] ms";
+					clock_t wait = (m_wait_file_on_disk_time*1000) + clock();					
                     while (wait > clock());
                     //
 

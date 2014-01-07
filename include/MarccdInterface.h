@@ -63,6 +63,8 @@ namespace lima
             //- Specific to MarCCD
             int* getHeader();
             void setTimeout(int TO);
+            void setWaitFileOnDiskTime(double value);
+            double getWaitFileOnDiskTime(void);
 
         private:
             Camera& m_cam;
