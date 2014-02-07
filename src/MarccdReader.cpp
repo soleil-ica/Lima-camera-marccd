@@ -45,6 +45,9 @@ const double kDEFAULT_READER_TIMEOUT_SEC = 10.;
 const size_t MARCCD_START_MSG = (yat::FIRST_USER_MSG + 300);
 const size_t MARCCD_RESET_MSG = (yat::FIRST_USER_MSG + 302);
 
+using namespace lima;
+using namespace lima::Marccd;
+
 //---------------------------
 //- Ctor
 //---------------------------
@@ -315,7 +318,7 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
                 m_image_number = m_cam.getFirstImage();
                 //- re-arm timeout
                 m_timeout.restart();
-                m_current_image_file_name = string("");
+                m_current_image_file_name = std::string("");
             }
                 break;
                 //-----------------------------------------------------
