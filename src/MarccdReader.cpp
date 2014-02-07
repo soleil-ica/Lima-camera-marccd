@@ -1,3 +1,25 @@
+//###########################################################################
+// This file is part of LImA, a Library for Image Acquisition
+//
+// Copyright (C) : 2009-2011
+// European Synchrotron Radiation Facility
+// BP 220, Grenoble 38043
+// FRANCE
+//
+// This is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This software is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//###########################################################################
+
 #include <yat/threading/Mutex.h>
 #include <sstream>
 #include <iostream>
@@ -22,6 +44,9 @@ const size_t kTASK_PERIODIC_TIMEOUT_MS = 1000;
 const double kDEFAULT_READER_TIMEOUT_SEC = 10.;
 const size_t MARCCD_START_MSG = (yat::FIRST_USER_MSG + 300);
 const size_t MARCCD_RESET_MSG = (yat::FIRST_USER_MSG + 302);
+
+using namespace lima;
+using namespace lima::Marccd;
 
 //---------------------------
 //- Ctor
@@ -153,6 +178,26 @@ void Reader::setTimeout(double newTimeOutVal)
 //
 //-----------------------------------------------------
 
+void Reader::setWaitFileOnDiskTime(double value)
+{
+    DEB_MEMBER_FUNCT();
+    m_wait_file_on_disk_time = value;
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
+double Reader::getWaitFileOnDiskTime(void)
+{
+    DEB_MEMBER_FUNCT();
+    return m_wait_file_on_disk_time;
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
 int* Reader::getHeader(void)
 {
     DEB_MEMBER_FUNCT();
@@ -229,7 +274,8 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
                     m_timeout.disable();
                     
                     //@@TODO : Check why we need this, otherwise unable to open the file !!
-                    clock_t wait = 5. /1* CLOCKS_PER_SEC + clock();
+					DEB_TRACE() << "Reader: Wait ["<<m_wait_file_on_disk_time<<"] ms";
+					clock_t wait = (m_wait_file_on_disk_time*1000) + clock();					
                     while (wait > clock());
                     //
 
@@ -272,7 +318,7 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
                 m_image_number = m_cam.getFirstImage();
                 //- re-arm timeout
                 m_timeout.restart();
-                m_current_image_file_name = string("");
+                m_current_image_file_name = std::string("");
             }
                 break;
                 //-----------------------------------------------------

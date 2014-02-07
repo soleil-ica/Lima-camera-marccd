@@ -1,201 +1,46 @@
+//###########################################################################
+// This file is part of LImA, a Library for Image Acquisition
+//
+// Copyright (C) : 2009-2011
+// European Synchrotron Radiation Facility
+// BP 220, Grenoble 38043
+// FRANCE
+//
+// This is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This software is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//###########################################################################
 #ifndef MARCCD_INTERFACE_H
 #define MARCCD_INTERFACE_H
 
 #include "HwInterface.h"
 #include "MarccdCamera.h"
-#include "MarccdReader.h"
+#include "MarccdDetInfoCtrlObj.h"
+#include "MarccdBufferCtrlObj.h"
+#include "MarccdSyncCtrlObj.h"
+#include "MarccdRoiCtrlObj.h"
+#include "MarccdBinCtrlObj.h"
 
 namespace lima
 {
     namespace Marccd
     {
-
-        class Interface;
-
-        //*******************************************************************
-        // \class DetInfoCtrlObj
-        // \brief Control object providing Marccd detector info interface
-        //*******************************************************************
-
-        class DetInfoCtrlObj : public HwDetInfoCtrlObj
-        {
-            DEB_CLASS_NAMESPC(DebModCamera, "DetInfoCtrlObj", "Marccd");
-
-        public:
-            DetInfoCtrlObj(Camera& cam);
-            virtual ~DetInfoCtrlObj();
-
-            virtual void getMaxImageSize(Size& max_image_size);
-            virtual void getDetectorImageSize(Size& det_image_size);
-
-            virtual void getDefImageType(ImageType& def_image_type);
-            virtual void getCurrImageType(ImageType& curr_image_type);
-            virtual void setCurrImageType(ImageType curr_image_type);
-            virtual void getPixelSize(double& x_size, double &y_size);
-            virtual void getDetectorType(std::string& det_type);
-            virtual void getDetectorModel(std::string& det_model);
-
-            virtual void registerMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
-            virtual void unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
-
-        private:
-
-            class MaxImageSizeCallbackGen : public HwMaxImageSizeCallbackGen
-            {
-            protected:
-                virtual void setMaxImageSizeCallbackActive(bool cb_active);
-            };
-
-            Camera& m_cam;
-            MaxImageSizeCallbackGen m_mis_cb_gen;
-        };
-
-
-        //*******************************************************************
-        // \class BufferCtrlObj
-        // \brief Control object providing Marccd buffering interface
-        //*******************************************************************
-
-        class BufferCtrlObj : public HwBufferCtrlObj
-        {
-            DEB_CLASS_NAMESPC(DebModCamera, "BufferCtrlObj", "Marccd");
-
-        public:
-            BufferCtrlObj(Camera& simu);
-            virtual ~BufferCtrlObj();
-
-            virtual void setFrameDim(const FrameDim& frame_dim);
-            virtual void getFrameDim(FrameDim& frame_dim);
-
-            virtual void setNbBuffers(int nb_buffers);
-            virtual void getNbBuffers(int& nb_buffers);
-
-            virtual void setNbConcatFrames(int nb_concat_frames);
-            virtual void getNbConcatFrames(int& nb_concat_frames);
-
-            virtual void getMaxNbBuffers(int& max_nb_buffers);
-
-            virtual void *getBufferPtr(int buffer_nb, int concat_frame_nb = 0);
-            virtual void *getFramePtr(int acq_frame_nb);
-
-            virtual void getStartTimestamp(Timestamp& start_ts);
-            virtual void getFrameInfo(int acq_frame_nb, HwFrameInfoType& info);
-
-            // -- Buffer control object
-
-            BufferCtrlMgr& getBufferMgr()
-            {
-                return m_buffer_ctrl_mgr;
-            };
-
-            StdBufferCbMgr& getBufferCbMgr()
-            {
-                return m_buffer_cb_mgr;
-            };
-
-            virtual void registerFrameCallback(HwFrameCallback& frame_cb);
-            virtual void unregisterFrameCallback(HwFrameCallback& frame_cb);
-
-            // Reader stuff
-			void start();
-            void reset();
-            int getLastAcquiredFrame();
-            bool isTimeoutSignaled(void);
-            bool isRunning(void);
-            void setTimeout(int TO);
-            int* getHeader(void);
-
-        private:
-            SoftBufferAllocMgr m_buffer_alloc_mgr;
-            StdBufferCbMgr m_buffer_cb_mgr;
-            BufferCtrlMgr m_buffer_ctrl_mgr;
-            Camera& m_cam;
-            Reader* m_reader;
-        };
-
-        //*******************************************************************
-        // * \class SyncCtrlObj
-        // * \brief Control object providing Marccd synchronization interface
-        // *******************************************************************/
-
-        class SyncCtrlObj : public HwSyncCtrlObj
-        {
-            DEB_CLASS_NAMESPC(DebModCamera, "SyncCtrlObj", "Marccd");
-
-        public:
-            SyncCtrlObj(Camera& cam);
-            virtual ~SyncCtrlObj();
-
-            virtual bool checkTrigMode(TrigMode trig_mode);
-            virtual void setTrigMode(TrigMode trig_mode);
-            virtual void getTrigMode(TrigMode& trig_mode);
-
-            virtual void setExpTime(double exp_time);
-            virtual void getExpTime(double& exp_time);
-
-            virtual void setLatTime(double lat_time);  //- Not supported by Marccd, simulate it using the theoric readout values
-            virtual void getLatTime(double& lat_time); //- Not supported by Marccd, simulate it using the theoric readout values
-
-            virtual void setNbFrames(int nb_frames);
-            virtual void getNbFrames(int& nb_frames);
-
-            virtual void setNbHwFrames(int nb_frames);
-            virtual void getNbHwFrames(int& nb_frames);
-
-            virtual void getValidRanges(ValidRangesType& valid_ranges);
-
-        private:
-            Camera& m_cam;
-        };
-
-        /*******************************************************************
-         * \class RoiCtrlObj
-         * \brief Control object providing Basler Roi interface
-         *******************************************************************/
-
-        class RoiCtrlObj : public HwRoiCtrlObj
-        {
-            DEB_CLASS_NAMESPC(DebModCamera, "RoiCtrlObj", "MarCCD");
-
-        public:
-            RoiCtrlObj(Camera& cam);
-            virtual ~RoiCtrlObj();
-
-            virtual void setRoi(const Roi& set_roi);
-            virtual void getRoi(Roi& hw_roi);
-            virtual void checkRoi(const Roi& set_roi, Roi& hw_roi);
-
-        private:
-            Camera& m_cam;
-        };
-
-        /*******************************************************************
-         * \class BinCtrlObj
-         * \brief Control object providing MarCCD Bin interface
-         *******************************************************************/
-        class BinCtrlObj : public HwBinCtrlObj
-        {
-			DEB_CLASS_NAMESPC(DebModCamera, "BinCtrlObj", "MarCCD");
-        public:
-            BinCtrlObj(Camera& cam);
-
-            virtual ~BinCtrlObj();
-
-            virtual void setBin(const Bin& bin);
-            virtual void getBin(Bin& bin);            
-            virtual void checkBin(Bin& bin); 
-        private:
-            Camera& m_cam;
-        };
-
         //*******************************************************************
         // * \class Interface
         // * \brief Marccd hardware interface
         //*******************************************************************/
-
         class Interface : public HwInterface
         {
-            DEB_CLASS_NAMESPC(DebModCamera, "Interface", "Marccd");
+            DEB_CLASS_NAMESPC(DebModCamera, "Interface", "MarCCD");
 
         public:
             Interface(Camera& cam);
@@ -208,34 +53,17 @@ namespace lima
             virtual void startAcq();
             virtual void stopAcq();
             virtual void getStatus(StatusType& status);
-            virtual int getNbAcquiredFrames();
             virtual int getNbHwAcquiredFrames();
 
-            void takeBackgroundFrame();
-            void saveBGFrame();
+            //! get the camera object to access it directly from client
+            Camera& getCamera() 
+                { return m_cam; }
 
-            void setImageIndex(int imgIdx);
-            int getImageIndex(void);
-
-            void setImageFileName(const string& name);
-            const string& getImageFileName(void);
-
-            void setImagePath(const string& path);
-            const string& getImagePath(void);
-
-            void setBeamX(float);
-            void setBeamY(float);
-            void setDistance(float);
-            void setWavelength(float);
-            float getBeamX();
-            float getBeamY();
-            float getDistance();
-            float getWavelength();
-
-            int* getHeader(void);
-
-            //- Allow the Reader to wait a file on disk during  TO (in s)
+            //- Specific to MarCCD
+            int* getHeader();
             void setTimeout(int TO);
+            void setWaitFileOnDiskTime(double value);
+            double getWaitFileOnDiskTime(void);
 
         private:
             Camera& m_cam;
@@ -245,7 +73,6 @@ namespace lima
             SyncCtrlObj m_sync;
             RoiCtrlObj m_roi;
             BinCtrlObj m_bin;
-
         };
 
     } // namespace Marccd
