@@ -834,11 +834,11 @@ void Camera::getStatus(Camera::Status& status)
 
         if (m_is_bg_acquisition_in_progress)
             m_status = Camera::Config;
-        else if (m_marccd_state == 0)
+        else if (m_marccd_state == TASK_STATE_IDLE)
             m_status = Camera::Ready;
-        else if (m_marccd_state == 7)
+        else if (m_marccd_state == TASK_STATE_ERROR)
             m_status = Camera::Fault;
-        else if (m_marccd_state == 8)
+        else if (m_marccd_state == TASK_STATE_BUSY)
             m_status = Camera::Config; /* TODO: replace by Readout perhaps ?!!  This is really busy interpreting command but we don't have a status for that yet */
         else if (acquireStatus & (TASK_STATUS_EXECUTING))
             m_status = Camera::Exposure;
@@ -1191,7 +1191,7 @@ void Camera::_performAcquisitionSequence()
                 _updateMarccdState();
                 THROW_ON_STATUS_ERROR(m_marccd_state, "_performAcquisitionSequence (Wait before start) ");
                 if (TEST_TASK_STATUS(m_marccd_state, TASK_ACQUIRE, TASK_STATUS_EXECUTING) ||
-                    TASK_STATE(m_marccd_state) >= 8)
+                    TASK_STATE(m_marccd_state) >= TASK_STATE_BUSY)
                     break;
                 is_first_trace = true;
                 step = SEND_START_STEP;
@@ -1224,7 +1224,7 @@ void Camera::_performAcquisitionSequence()
                 _updateMarccdState();
                 THROW_ON_STATUS_ERROR(m_marccd_state, "_performAcquisitionSequence (Wait after start) ");
                 if (!TEST_TASK_STATUS(m_marccd_state, TASK_ACQUIRE, TASK_STATUS_EXECUTING) ||
-                    TASK_STATE(m_marccd_state) >= 8)
+                    TASK_STATE(m_marccd_state) >= TASK_STATE_BUSY)
                     break;
                 is_first_trace = true;
                 step = WAIT_EXPOSURE_STEP;
@@ -1318,7 +1318,7 @@ void Camera::_performAcquisitionSequence()
                 _updateMarccdState();
                 THROW_ON_STATUS_ERROR(m_marccd_state, "_performAcquisitionSequence (Wait for writting) ");
                 if (TEST_TASK_STATUS(m_marccd_state, TASK_WRITE, TASK_STATUS_EXECUTING | TASK_STATUS_QUEUED) ||
-                    TASK_STATE(m_marccd_state) >= 8)
+                    TASK_STATE(m_marccd_state) >= TASK_STATE_BUSY)
                     break;
 
                 is_first_trace = true;
@@ -1401,7 +1401,7 @@ void Camera::_performBackgroundFrame()
     _updateMarccdState();
     THROW_ON_STATUS_ERROR(m_marccd_state, "_performBackgroundFrame (Wait dezinger+executing) ");
     while (TEST_TASK_STATUS(m_marccd_state, TASK_DEZINGER, TASK_STATUS_EXECUTING | TASK_STATUS_QUEUED) ||
-        TASK_STATE(m_marccd_state) >= 8)
+        TASK_STATE(m_marccd_state) >= TASK_STATE_BUSY)
     {
 
         sleep(MARCCD_POLL_DELAY);
@@ -1449,7 +1449,7 @@ void Camera::_readoutFrame(unsigned bufferNumber)
     _updateMarccdState();
     THROW_ON_STATUS_ERROR(m_marccd_state, "_performBackgroundFrame (Wait before readout) ");
     while (TEST_TASK_STATUS(m_marccd_state, TASK_READ, TASK_STATUS_EXECUTING | TASK_STATUS_QUEUED) ||
-        TASK_STATE(m_marccd_state) >= 8)
+        TASK_STATE(m_marccd_state) >= TASK_STATE_BUSY)
     {
         sleep(MARCCD_POLL_DELAY);
         _updateMarccdState();

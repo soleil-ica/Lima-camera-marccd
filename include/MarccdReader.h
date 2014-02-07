@@ -14,16 +14,8 @@
 #include <limits>
 
 //#include "Debug.h"
-#include "Data.h"
-
 #include "HwMaxImageSizeCallback.h"
 #include "MarccdCamera.h"
-#include "HwBufferCtrlObj.h"
-
-
-using namespace lima;
-using namespace lima::Marccd;
-using namespace std;
 
 
 
@@ -34,11 +26,11 @@ namespace lima
         /***
          * MarCCD header structure
          ***/
-#define UINT32		unsigned int
-#define UINT16		unsigned short
-#define INT32		signed int
-#define INT16		signed short
-#define MARCCD_MAXIMAGES	9
+typedef unsigned int UINT32;
+typedef unsigned short UINT16;
+typedef signed int INT32;
+typedef signed short INT16;
+const int MARCCD_MAXIMAGES = 9;
 
         typedef struct
         {
@@ -227,6 +219,8 @@ namespace lima
             bool isRunning();
             //- define max allowed time to _read image file
             void setTimeout(double);
+            void setWaitFileOnDiskTime(double value);        
+            double getWaitFileOnDiskTime(void);                   
             //- get last image header
             int* getHeader();
 
@@ -250,7 +244,8 @@ namespace lima
 
             //- Timeout management (while processing image file)
             yat::Timeout m_timeout;
-            int m_timeout_value;
+            int     m_timeout_value;
+            double  m_wait_file_on_disk_time;//in ms
             MARCCD_HEADER_UNION hccd;
 
         };

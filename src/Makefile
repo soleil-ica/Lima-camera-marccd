@@ -1,9 +1,8 @@
-marccd-objs =  MarccdInterface.o MarccdCamera.o MarccdReader.o
+marccd-objs =  MarccdInterface.o MarccdCamera.o MarccdReader.o MarccdBinCtrlObj.o MarccdBufferCtrlObj.o MarccdDetInfoCtrlObj.o MarccdSyncCtrlObj.o
 SRCS = $(marccd-objs:.o=.cpp) 
 
 CXXFLAGS += -I../include -I../../../hardware/include -I../../../common/include \
 			-I../../../third-party/Processlib/core/include \
-			-I../../../../include/DiffractionImage \
 			-I../../../third-party/yat/include \
 			-Wall -pthread -fPIC -g
 
