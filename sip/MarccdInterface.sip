@@ -12,7 +12,7 @@ class Interface : HwInterface
 %End
 
  public:
-	Interface(Marccd::Camera& cam);
+	Interface(Marccd::Camera& cam /KeepReference/);
 	virtual ~Interface();
 
 	//- From HwInterface
