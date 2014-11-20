@@ -247,8 +247,8 @@ namespace lima
             yat::ClientSocket m_sock;
 
             //- mutex's to protect some variables from acces read/write from device & task 
-            yat::Mutex m_lock;
-            yat::Mutex m_lock_flag;
+            yat::Mutex m_lock_data;
+            yat::Mutex m_lock_cmd;
             yat::Mutex m_lock_status;
 
             //- image/file stuff

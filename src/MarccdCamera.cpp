@@ -358,7 +358,7 @@ void Camera::stop()
 {
     DEB_MEMBER_FUNCT();
     {
-        yat::MutexLock scoped_lock(m_lock_flag);
+        yat::MutexLock scoped_lock(m_lock_cmd);
         m_is_stop_in_progress = true;
     }
 
@@ -377,7 +377,7 @@ void Camera::takeBackgroundFrame()
 {
     DEB_MEMBER_FUNCT();
     {
-        yat::MutexLock scoped_lock(m_lock_flag);
+        yat::MutexLock scoped_lock(m_lock_cmd);
         m_is_bg_acquisition_in_progress = true;
     }
 
@@ -399,7 +399,7 @@ void Camera::getImageSize(Size& size)
     int sizeX, sizeY;
     try
     {
-        yat::MutexLock scoped_lock(m_lock);
+        yat::MutexLock scoped_lock(m_lock_data);
         //- get the max image size of the detector
         resp = _sendCmdAndReceiveAnswer("get_size");
 
@@ -638,7 +638,7 @@ void Camera::setRoi(const Roi& set_roi)
                 << ","
                 << set_roi.getTopLeft().y + set_roi.getSize().getHeight();
             {
-                yat::MutexLock scoped_lock(m_lock);
+                yat::MutexLock scoped_lock(m_lock_data);
                 _sendCmdAndReceiveAnswer(strRoi.str());
             }
         }
@@ -672,7 +672,7 @@ void Camera::getRoi(Roi& hw_roi)
         //- get the new roi values        
         {
             std::string resp("");
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             resp = _sendCmdAndReceiveAnswer("get_roi");
             sscanf(resp.c_str(), "%d,%d,%d,%d", &x0, &y0, &x1, &y1);
         }
@@ -751,7 +751,7 @@ void Camera::setBinning(const Bin &bin)
         bin_values << "set_bin," << m_binning_x << "," << m_binning_y << std::ends;
         //- set the new binning values
         {
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             _sendCmdAndReceiveAnswer(bin_values.str());
         }
     }
@@ -786,7 +786,7 @@ void Camera::getBinning(Bin& bin)
         //- get the new binning values        
         {
             std::string resp("");
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             resp = _sendCmdAndReceiveAnswer("get_bin");
             sscanf(resp.c_str(), "%d,%d", &binX, &binY);
         }
@@ -821,7 +821,7 @@ void Camera::getStatus(Camera::Status& status)
     size_t acquireStatus, readoutStatus, correctStatus, writingStatus, dezingerStatus;
 
     {
-        yat::MutexLock scoped_lock_1(m_lock_flag);
+        yat::MutexLock scoped_lock_1(m_lock_cmd);
         yat::MutexLock scoped_lock_2(m_lock_status);
 
         _updateMarccdState();
@@ -871,7 +871,7 @@ void Camera::setBeamX(float X)
         std::stringstream cmd;
         cmd << "header,beam_x=" << X << "\n";
         {
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             _sendCmdAndReceiveAnswer(cmd.str());
         }
     }
@@ -904,7 +904,7 @@ void Camera::setBeamY(float Y)
         std::stringstream cmd;
         cmd << "header,beam_y=" << Y << "\n";
         {
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             _sendCmdAndReceiveAnswer(cmd.str());
         }
     }
@@ -937,7 +937,7 @@ void Camera::setDistance(float D)
         std::stringstream cmd;
         cmd << "header,detector_distance=" << D << "\n";
         {
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             _sendCmdAndReceiveAnswer(cmd.str());
         }
     }
@@ -970,7 +970,7 @@ void Camera::setWavelength(float W)
         std::stringstream cmd;
         cmd << "header,source_wavelength=" << W << "\n";
         {
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             _sendCmdAndReceiveAnswer(cmd.str());
         }
     }
@@ -1205,7 +1205,7 @@ void Camera::_performAcquisitionSequence()
                 DEB_TRACE() << "Send start command to the marccd";
                 std::string cmd_to_send("start");
                 {
-                    yat::MutexLock scoped_lock(m_lock);
+                    yat::MutexLock scoped_lock(m_lock_data);
                     _sendCmdAndReceiveAnswer(cmd_to_send);
                 }
                 step = WAIT_ACQUIRE_EXECUTING_STEP;
@@ -1252,7 +1252,7 @@ void Camera::_performAcquisitionSequence()
 
                 //if command stop is occured, then stop the exposure timer
                 {
-                    yat::MutexLock scoped_lock(m_lock_flag);
+                    yat::MutexLock scoped_lock(m_lock_cmd);
                     if (m_is_stop_in_progress)
                     {
                         DEB_TRACE() << "Stop the timer Exposure due to a user command Stop !";
@@ -1280,7 +1280,7 @@ void Camera::_performAcquisitionSequence()
                 std::string cmd_to_send;
 
                 {
-                    yat::MutexLock scoped_lock(m_lock_flag);
+                    yat::MutexLock scoped_lock(m_lock_cmd);
                     if (!m_is_bg_saving_requested)
                     {
                         cmd_to_send = "readout,0,";
@@ -1291,13 +1291,16 @@ void Camera::_performAcquisitionSequence()
                     }
                 }
 
-                std::stringstream ssEntry;
+                {
+                yat::MutexLock scoped_lock(m_lock_cmd);
+                std::stringstream ssEntry;                
                 ssEntry << m_image_path << m_image_name << "_" << m_image_number;
                 cmd_to_send += (ssEntry.str());
+                }
 
                 {
-                    yat::MutexLock scoped_lock_1(m_lock);
-                    yat::MutexLock scoped_lock_2(m_lock_flag);
+                    yat::MutexLock scoped_lock_1(m_lock_data);
+                    yat::MutexLock scoped_lock_2(m_lock_cmd);
                     _sendCmdAndReceiveAnswer(cmd_to_send);
                     m_is_bg_saving_requested = false;
                 }
@@ -1392,7 +1395,7 @@ void Camera::_performBackgroundFrame()
     DEB_TRACE() << "Send dezinger 1 => use and store into the current background frame";
     std::stringstream cmd_to_send("dezinger,1");
     {
-        yat::MutexLock scoped_lock(m_lock);
+        yat::MutexLock scoped_lock(m_lock_data);
         _sendCmdAndReceiveAnswer(cmd_to_send.str());
     }
 
@@ -1412,7 +1415,7 @@ void Camera::_performBackgroundFrame()
     /* inform that background is done */
 
     {
-        yat::MutexLock scoped_lock(m_lock_flag);
+        yat::MutexLock scoped_lock(m_lock_cmd);
         m_is_bg_acquisition_in_progress = false;
     }
 
@@ -1427,7 +1430,7 @@ void Camera::_performStopSequence()
     DEB_MEMBER_FUNCT();
 
     {
-        yat::MutexLock scoped_lock(m_lock_flag);
+        yat::MutexLock scoped_lock(m_lock_cmd);
         m_is_stop_in_progress = false;
     }
 }
@@ -1462,7 +1465,7 @@ void Camera::_readoutFrame(unsigned bufferNumber)
     std::stringstream cmd_to_send;
     cmd_to_send << "readout" << "," << bufferNumber;
     {
-        yat::MutexLock scoped_lock(m_lock);
+        yat::MutexLock scoped_lock(m_lock_data);
         _sendCmdAndReceiveAnswer(cmd_to_send.str());
     }
 
@@ -1519,7 +1522,7 @@ void Camera::_updateMarccdState()
         ::strncpy(data_to_conv, stateStr.c_str(), stateStr.size());
 
         {
-            yat::MutexLock scoped_lock(m_lock);
+            yat::MutexLock scoped_lock(m_lock_data);
             m_marccd_state = _convertStringToInt(data_to_conv);
         }
     }
@@ -1545,7 +1548,10 @@ void Camera::_updateMarccdState()
 
 void Camera::setImagePath(const std::string& imgPath)
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     m_image_path = imgPath;
+    }
 }
 
 //-----------------------------------------------------
@@ -1554,7 +1560,10 @@ void Camera::setImagePath(const std::string& imgPath)
 
 const std::string& Camera::getImagePath(void)
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     return m_image_path;
+    }
 }
 
 //-----------------------------------------------------
@@ -1563,7 +1572,10 @@ const std::string& Camera::getImagePath(void)
 
 void Camera::setImageFileName(const std::string& imgName)
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     m_image_name = imgName;
+    }
 }
 
 //-----------------------------------------------------
@@ -1572,7 +1584,10 @@ void Camera::setImageFileName(const std::string& imgName)
 
 const std::string& Camera::getImageFileName(void)
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     return m_image_name;
+    }
 }
 
 
@@ -1582,7 +1597,10 @@ const std::string& Camera::getImageFileName(void)
 
 void Camera::setImageIndex(int newImgIdx)
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     m_image_number = newImgIdx;
+    }
 }
 
 //-----------------------------------------------------
@@ -1591,7 +1609,10 @@ void Camera::setImageIndex(int newImgIdx)
 
 int Camera::getImageIndex()
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     return m_image_number;
+    }
 }
 
 //-----------------------------------------------------
@@ -1600,7 +1621,10 @@ int Camera::getImageIndex()
 
 int Camera::getFirstImage()
 {
+    {
+    yat::MutexLock scoped_lock(m_lock_cmd);
     return m_first_image;
+    }
 }
 
 //-----------------------------------------------------
@@ -1610,8 +1634,8 @@ int Camera::getFirstImage()
 void Camera::saveBGFrame(bool BG)
 {
     {
-        yat::MutexLock scoped_lock(m_lock_flag);
-        m_is_bg_saving_requested = BG;
+    yat::MutexLock scoped_lock(m_lock_cmd);
+    m_is_bg_saving_requested = BG;
     }
 }
 
