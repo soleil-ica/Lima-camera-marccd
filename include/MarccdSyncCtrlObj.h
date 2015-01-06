@@ -23,7 +23,7 @@
 #define MARCCDSYNCCTRLOBJ_H
 
 #include "MarccdCamera.h"
-#include "HwSyncCtrlObj.h"
+#include "lima/HwSyncCtrlObj.h"
 
 namespace lima
 {

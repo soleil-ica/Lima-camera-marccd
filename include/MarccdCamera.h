@@ -7,7 +7,7 @@
 #include <yat/threading/Task.h>
 #include <yat/network/ClientSocket.h>
 #include <yat/time/Time.h>
-#include <Timer.h>
+#include "lima/Timer.h"
 
 #define kLO_WATER_MARK      128
 #define kHI_WATER_MARK      512
@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <limits>
 
-#include "HwBufferMgr.h"
+#include "lima/HwBufferMgr.h"
 
 namespace lima
 {

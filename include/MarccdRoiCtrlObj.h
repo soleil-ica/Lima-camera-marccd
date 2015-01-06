@@ -23,7 +23,7 @@
 #define MARCCDROICTRLOBJ_H
 
 #include "MarccdCamera.h"
-#include "HwRoiCtrlObj.h"
+#include "lima/HwRoiCtrlObj.h"
 
 namespace lima
 {

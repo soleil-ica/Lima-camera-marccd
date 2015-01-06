@@ -23,7 +23,7 @@
 #define MARCCDBINCTRLOBJ_H
 
 #include "MarccdCamera.h"
-#include "HwBinCtrlObj.h"
+#include "lima/HwBinCtrlObj.h"
 
 namespace lima
 {

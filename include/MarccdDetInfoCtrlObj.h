@@ -23,8 +23,8 @@
 #define MARCCDDETINFOCTRLOBJ_H
 
 #include "MarccdCamera.h"
-#include "HwDetInfoCtrlObj.h"
-#include "HwMaxImageSizeCallback.h"
+#include "lima/HwDetInfoCtrlObj.h"
+#include "lima/HwMaxImageSizeCallback.h"
 
 namespace lima
 {

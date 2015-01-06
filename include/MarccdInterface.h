@@ -22,7 +22,7 @@
 #ifndef MARCCD_INTERFACE_H
 #define MARCCD_INTERFACE_H
 
-#include "HwInterface.h"
+#include "lima/HwInterface.h"
 #include "MarccdCamera.h"
 #include "MarccdDetInfoCtrlObj.h"
 #include "MarccdBufferCtrlObj.h"
