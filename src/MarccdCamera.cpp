@@ -5,7 +5,7 @@
 #include <string>
 #include <math.h>
 #include <time.h>
-#include "Timer.h"
+#include "lima/Timer.h"
 
 
 using namespace lima;

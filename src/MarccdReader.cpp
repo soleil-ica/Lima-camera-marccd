@@ -28,9 +28,9 @@
 #include <math.h>
 #include <time.h>
 #include <sys/stat.h>
-#include "Debug.h"
-#include "Constants.h"
-#include "Data.h"
+#include "lima/Debug.h"
+#include "lima/Constants.h"
+#include "processlib/Data.h"
 #include "MarccdReader.h"
 #include "MarccdInterface.h"
 #include "errno.h"

@@ -14,7 +14,7 @@
 #include <limits>
 
 //#include "Debug.h"
-#include "HwMaxImageSizeCallback.h"
+#include "lima/HwMaxImageSizeCallback.h"
 #include "MarccdCamera.h"
 
 

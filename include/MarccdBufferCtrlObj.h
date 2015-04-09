@@ -24,7 +24,7 @@
 
 #include "MarccdCamera.h"
 #include "MarccdReader.h"
-#include "HwBufferCtrlObj.h"
+#include "lima/HwBufferCtrlObj.h"
 //#include "HwBufferMgr.h"
 
 namespace lima
