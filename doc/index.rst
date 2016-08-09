@@ -1,7 +1,7 @@
 .. _camera-marccd:
 
 MarCCD
--------
+------
 
 .. image:: marccd.png
 
