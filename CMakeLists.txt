@@ -21,39 +21,37 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, see <http://www.gnu.org/licenses/>.
 ############################################################################
+set(NAME "marccd")
 
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--add-needed")
 
-set(marccd_srcs src/MarccdCamera.cpp  src/MarccdInterface.cpp
+set(${NAME}_srcs src/MarccdCamera.cpp  src/MarccdInterface.cpp
 	 src/MarccdDetInfoCtrlObj.cpp src/MarccdSyncCtrlObj.cpp
 	 src/MarccdBinCtrlObj.cpp src/MarccdBufferCtrlObj.cpp
 	 src/MarccdRoiCtrlObj.cpp src/MarccdReader.cpp)
 
-file(STRINGS "VERSION" marccd_vers)
-add_library(limamarccd SHARED ${marccd_srcs})
+add_library(lima${NAME} SHARED ${${NAME}_srcs})
 
-target_include_directories(limamarccd PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_include_directories(limamarccd PUBLIC "/usr/local/yat/include")
+target_include_directories(lima${NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(lima${NAME} PUBLIC "/usr/local/yat/include")
 
-find_library(MARCCD_LIB_YAT yat /usr/local/yat/lib64)
-find_library(MARCCD_LIB_RT rt)
-if("${MARCCD_LIB_RT}" STREQUAL "MARCCD_LIB_RT-NOTFOUND") 
-  message(FATAL_ERROR "marccd : librt not found, you can search it in cmake-gui or try to install it if it isn't here.")
+find_library(MARCCD_YAT_LIB yat /usr/local/yat/lib64)
+find_library(MARCCD_RT_LIB rt)
+if("${MARCCD_RT_LIB}" STREQUAL "MARCCD_RT_LIB-NOTFOUND") 
+  message(FATAL_ERROR "${NAME} : librt not found, you can search it in cmake-gui or try to install it if it isn't here.")
 endif()
-if("${MARCCD_LIB_YAT}" STREQUAL "MARCCD_LIB_YAT-NOTFOUND")
-  message(FATAL_ERROR "marccd : libyat not found, you can search it in cmake-gui or try to install it if it isn't here.")
+if("${MARCCD_YAT_LIB}" STREQUAL "MARCCD_YAT_LIB-NOTFOUND")
+  message(FATAL_ERROR "${NAME} : libyat not found, you can search it in cmake-gui or try to install it if it isn't here.")
 endif()
 
-target_link_libraries(limamarccd limacore)
-target_link_libraries(limamarccd ${MARCCD_LIB_YAT})
-target_link_libraries(limamarccd ${MARCCD_LIB_RT})
+target_link_libraries(lima${NAME} limacore)
+target_link_libraries(lima${NAME} ${MARCCD_YAT_LIB})
+target_link_libraries(lima${NAME} ${MARCCD_RT_LIB})
 
-set_target_properties(limamarccd PROPERTIES VERSION ${marccd_vers} SOVERSION "1")
+include(CameraVERSION)
+install(TARGETS lima${NAME} LIBRARY DESTINATION lib)
 
-install(TARGETS limamarccd LIBRARY DESTINATION lib)
-
-if(COMPILE_SIP)
-    set(NAME "marccd")
+if(LIMA_ENABLE_PYTHON)
     include(CameraRunSIP)
     install(FILES python/__init__.py DESTINATION "${PYTHON_SITE_PACKAGES_DIR}/Lima/Marccd")
 endif()
