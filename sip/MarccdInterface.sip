@@ -26,29 +26,6 @@ class Interface : HwInterface
 	virtual int   getNbAcquiredFrames();
 	virtual int   getNbHwAcquiredFrames();
 
-	void takeBackgroundFrame();
-	void saveBG();
-	void getFrameRate(double& frame_rate);
-	
-	void setImageIndex(int imgIdx);
-	int  getImageIndex();		
-	
-	void setImageFileName(const std::string& name);
-	const std::string&  getImageFileName();
-	
-	void setImagePath(const std::string& path);
-	const std::string&  getImagePath();
-	
-	unsigned int getCamState();
-
-        void setBeamX(float);
-        void setBeamY(float);
-        void setDistance(float);
-        void setWavelength(float);
-        float getBeamX();
-        float getBeamY();
-        float getDistance();
-        float getWavelength();
 
 	SIP_PYDICT getHeader();	
 %MethodCode
