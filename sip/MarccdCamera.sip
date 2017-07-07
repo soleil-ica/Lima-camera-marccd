@@ -34,9 +34,8 @@ namespace Marccd
 
     void start();
     void stop();
-    void take_background_frame();
-    
-    void prepare(); //- USEFULL ?
+        
+ 
     
     // -- detector info
     void getImageSize(Size& size /Out/);
@@ -63,13 +62,11 @@ namespace Marccd
 
     void getStatus(Marccd::Camera::Status& status /Out/);
     unsigned int getState();
-    void getFrameRate(double& frame_rat /Out/);
     
     void setBinning(const Bin&);
     void getBinning(Bin& /Out/);
     void checkBin(Bin& /In,Out/);
     
-    bool is_stop_sequence_finished();
     
     void  setImagePath(const std::string& path);
     const std::string&  getImagePath();
@@ -79,12 +76,10 @@ namespace Marccd
     void setImageFileName(const std::string& imgName);
     const std::string& getImageFileName();
 
-    const std::string& getFullImgName();
 
     void setImageIndex(int newImgIdx);
     int getImageIndex();
     int getFirstImage() ;
-    void saveBG(bool);
 
     void setBeamX(float);
     void setBeamY(float);
