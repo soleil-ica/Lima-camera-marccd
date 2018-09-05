@@ -248,3 +248,13 @@ int* BufferCtrlObj::getHeader()
     DEB_MEMBER_FUNCT();
     return m_reader->getHeader();
 }
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
+void BufferCtrlObj::setNbRetry(int value)
+{
+    DEB_MEMBER_FUNCT();
+    m_reader->setNbRetry(value);
+}

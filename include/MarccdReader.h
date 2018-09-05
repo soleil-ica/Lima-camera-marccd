@@ -223,13 +223,15 @@ const int MARCCD_MAXIMAGES = 9;
             double getWaitFileOnDiskTime(void);                   
             //- get last image header
             int* getHeader();
+            //- define nbRetry on getImageFromFile() before fire an exception.
+            void setNbRetry(int value);
 
             //- [yat::Task implementation]
         protected:
             virtual void handle_message(yat::Message& msg) throw (yat::Exception);
 
             //- _read Marccd image from a file and update device image attribute
-            bool getImageFromFile(const std::string& fileName);
+            bool getImageFromFile(const std::string& fileName, bool is_exception_enabled = true);
 
         private:
 
@@ -246,6 +248,7 @@ const int MARCCD_MAXIMAGES = 9;
             yat::Timeout m_timeout;
             int     m_timeout_value;
             double  m_wait_file_on_disk_time;//in ms
+            int     m_nb_retry;
             MARCCD_HEADER_UNION hccd;
 
         };

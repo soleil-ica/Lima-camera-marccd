@@ -84,7 +84,7 @@ namespace lima
         void setWaitFileOnDiskTime(double value);
         double getWaitFileOnDiskTime(void);		
         int* getHeader(void);
-
+        void setNbRetry(int value);
     private:
         SoftBufferAllocMgr m_buffer_alloc_mgr;
         StdBufferCbMgr m_buffer_cb_mgr;

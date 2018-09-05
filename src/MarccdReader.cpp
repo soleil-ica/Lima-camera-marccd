@@ -66,7 +66,8 @@ m_cam(cam),
 m_buffer(buffer_ctrl),
 m_image_number(0),
 m_current_image_file_name(""),
-m_timeout_value(kDEFAULT_READER_TIMEOUT_SEC)
+m_timeout_value(kDEFAULT_READER_TIMEOUT_SEC),
+m_nb_retry(0)
 {
     DEB_CONSTRUCTOR();
 }
@@ -208,6 +209,17 @@ int* Reader::getHeader(void)
 //
 //-----------------------------------------------------
 
+void Reader::setNbRetry(int value)
+{
+    DEB_MEMBER_FUNCT();
+    m_nb_retry = value;
+}
+
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+
 void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
 {
     DEB_MEMBER_FUNCT();
@@ -279,9 +291,16 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
                     while (wait > clock());
                     //
 
-                    //- _read image file
-                    getImageFromFile(m_current_image_file_name);
-
+                    //- _read image file                    
+					for(int i=0;i<=m_nb_retry;i++)
+					{ 
+						if(getImageFromFile(m_current_image_file_name, (i==m_nb_retry)?true:false))
+							break;
+						else
+							usleep(100*1000);//wait 100 ms
+					}
+					
+					// get frame number
                     int nb_frames;
                     m_cam.getNbFrames(nb_frames);
 
@@ -345,7 +364,7 @@ void Reader::handle_message(yat::Message& msg) throw ( yat::Exception)
 }
 //-----------------------------------------------------
 
-bool Reader::getImageFromFile(const std::string& fileName)
+bool Reader::getImageFromFile(const std::string& fileName, bool is_exception_enabled)
 {
     DEB_MEMBER_FUNCT();
     StdBufferCbMgr& buffer_mgr = ((reinterpret_cast<BufferCtrlObj&> (m_buffer)).getBufferCbMgr());
@@ -406,7 +425,10 @@ bool Reader::getImageFromFile(const std::string& fileName)
         {
             fclose(file);
             DEB_ERROR()<<"Error reading the MARCCD_HEADER from file !";           
-            throw LIMA_HW_EXC(Error, "Error reading the MARCCD_HEADER from file !");
+			if(is_exception_enabled)
+				throw LIMA_HW_EXC(Error, "Error reading the MARCCD_HEADER from file !");
+			else
+				return false;
         }
         
         // get the Image raw data !!!
@@ -415,12 +437,16 @@ bool Reader::getImageFromFile(const std::string& fileName)
         {
             fclose(file);
             DEB_ERROR()<<"Error reading the RAW Data from file !";            
-            throw LIMA_HW_EXC(Error, "Error reading the RAW Data from file !");
+			if(is_exception_enabled)			
+				throw LIMA_HW_EXC(Error, "Error reading the RAW Data from file !");
+			else
+				return false;
         }
         fclose(file);
     }
 
     DEB_TRACE() << "Reader: Publish the New Frame (FrameNb = " << frameNumber << ")";
-    return buffer_mgr.newFrameReady(frame_info);
+    buffer_mgr.newFrameReady(frame_info);
+	return true;
 }
 

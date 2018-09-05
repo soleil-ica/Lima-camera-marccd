@@ -64,6 +64,7 @@ namespace lima
             void setTimeout(int TO);
             void setWaitFileOnDiskTime(double value);
             double getWaitFileOnDiskTime(void);
+            void setNbRetry(int value);
 
         private:
             Camera& m_cam;
